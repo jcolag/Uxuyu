@@ -1,15 +1,18 @@
-import React, { Component } from "react"; // import from react
+import React, { Component } from "react";
 
-import { Window, App } from "proton-native"; // import the proton-native components
+import { Window, App } from "proton-native";
 
 export default class Example extends Component {
   render() {
-    // all Components must have a render method
     return (
       <App>
-        {/* you must always include App around everything */}
-        <Window style={{ width: 300, height: 300, backgroundColor: "blue" }}>
-          {/* all your other components go here*/}
+        <Window
+          style={{
+            width: '75%',
+            height: '75%',
+            backgroundColor: "black",
+          }}
+        >
         </Window>
       </App>
     );
