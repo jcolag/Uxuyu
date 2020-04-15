@@ -9,6 +9,7 @@
     "build": "babel index.js app.js -d bin/"
   },
   "dependencies": {
+    "ini": "^1.3.5",
     "proton-native": "^2.0.4"
   },
   "devDependencies": {

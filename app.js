@@ -8,6 +8,18 @@ import {
   Window,
 } from "proton-native";
 
+const fs = require('fs');
+const homedir = require('os').homedir();
+const ini = require('ini');
+const path = require('path');
+
+const twtxtconfig = ini.parse(
+  fs.readFileSync(
+    path.join(homedir, '.config', 'twtxt', 'config'),
+    'utf-8'
+  )
+);
+
 export default class Example extends Component {
   constructor(props) {
     let config = {
@@ -15,13 +27,19 @@ export default class Example extends Component {
       exportStyle: '',
       fontSize: 18,
       foregroundColor: 'white',
-      interval: 250,
+      interval: 30000,
     };
 
     super(props);
     this.state = {
       config: config,
+      following: twtxtconfig.following,
+      monitor: setInterval(this.monitorForChanges, config.interval, this),
+      twtxt: twtxtconfig.twtxt,
     };
+  }
+
+  monitorForChanges(self) {
   }
 
   render() {
