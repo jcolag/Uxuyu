@@ -29,13 +29,14 @@ export default class TwtxtClient extends Component {
       exportStyle: '',
       fontSize: 18,
       foregroundColor: 'white',
-      interval: 30000,
+      minInterval: 15,
     };
     const worker = new Worker(
       './followworker.js',
       {
         workerData: {
           following: twtxtconfig.following,
+          minInterval: Math.max(config.minInterval, 5),
           twtxtConfig: twtxtconfig.twtxt,
         },
       }
@@ -45,7 +46,6 @@ export default class TwtxtClient extends Component {
     this.state = {
       config: config,
       following: twtxtconfig.following,
-      monitor: setInterval(this.monitorForChanges, config.interval, this),
       posts: {
         'nobody': [
           {
@@ -58,6 +58,8 @@ export default class TwtxtClient extends Component {
       twtxt: twtxtconfig.twtxt,
     };
     worker.on('message', this.takeUpdate.bind(this));
+    worker.on('error', this.reportUpdateError.bind(this));
+    worker.on('exit', this.reportExit.bind(this));
   }
 
   takeUpdate(userUpdate) {
@@ -72,7 +74,30 @@ export default class TwtxtClient extends Component {
     });
   }
 
-  monitorForChanges(self) {
+  reportUpdateError(err) {
+    this.addFakeMessage('ERROR:', JSON.stringify(err, ' ', 2));
+  }
+
+  reportExit(code) {
+    this.addFakeMessage('WARNING: Worker has stopped with exit code', code);
+  }
+
+  addFakeMessage(message, code) {
+    const handle = this.state.twtxt.nick;
+    const posts = this.state.posts;
+    const myPosts = posts[handle];
+
+    this.setState({
+      posts: {},
+    });
+    myPosts.push({
+      date: new Date(),
+      message: `${message} ${code}`,
+    });
+    posts[handle] = myPosts;
+    this.setState({
+      posts: posts,
+    });
   }
 
   render() {

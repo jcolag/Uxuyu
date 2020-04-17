@@ -1,35 +1,37 @@
 const fs = require('fs');
 const request = require('request');
 const {
-  isMainThread,
-  MessageChannel,
-  MessagePort,
   parentPort,
-  Worker,
   workerData,
 } = require('worker_threads');
 
 const handles = Object.keys(workerData.following);
+const ms = workerData.minInterval * 60 * 1000;
+const interval = setInterval(updatePosts, ms, parentPort, handles);
 
-parentPort.postMessage(
-  postsFromLog(
-    fs.readFileSync(
-      workerData.twtxtConfig.twtfile, 'utf-8'
-    ),
-    workerData.twtxtConfig.nick
-  )
-);
-handles.forEach(h => {
-  const url = workerData.following[h];
+updatePosts(parentPort, handles);
 
-  request(url, (err, res, body) => {
-    if (err) {
-      return;
-    }
+function updatePosts(parentPort, handles) {
+  parentPort.postMessage(
+    postsFromLog(
+      fs.readFileSync(
+        workerData.twtxtConfig.twtfile, 'utf-8'
+      ),
+      workerData.twtxtConfig.nick
+    )
+  );
+  handles.forEach(h => {
+    const url = workerData.following[h];
 
-    parentPort.postMessage(postsFromLog(body, h));
+    request(url, (err, res, body) => {
+      if (err) {
+        return;
+      }
+
+      parentPort.postMessage(postsFromLog(body, h));
+    });
   });
-});
+}
 
 function postsFromLog(logData, handle) {
   const posts = logData
