@@ -3,15 +3,18 @@ import React, {
 } from "react";
 import {
   App,
+  Button,
   Text,
   View,
   Window,
 } from "proton-native";
 
 const fs = require('fs');
+const getUrls = require('get-urls');
 const homedir = require('os').homedir();
 const ini = require('ini');
 const moment = require('moment');
+const opn = require('opn');
 const path = require('path');
 const { Worker } = require('worker_threads');
 
@@ -100,6 +103,59 @@ export default class TwtxtClient extends Component {
     });
   }
 
+  openUrl() {
+    opn(this);
+  }
+
+  createMessageBlock(post, key) {
+    const urls = getUrls(post.message);
+    const links = [];
+
+    urls.forEach(u => links.push(<Button
+      key={`link-${key++}`}
+      onPress={this.openUrl.bind(u.replace(/&[^;]*;$/, ''))}
+      style={{
+        border: `1px solid ${this.state.config.foregroundColor}`,
+        color: this.state.config.foregroundColor,
+        fontSize: `${this.state.config.fontSize}pt`,
+        fontWeight: 'normal',
+        textAlign: 'left',
+        width: '99%',
+      }}
+      title={u.replace(/&[^;]*;$/, '')}
+    />));
+    return (<View
+        key={ ++key }
+      >
+        <Text
+          key={ ++key }
+          style={{
+            color: this.state.config.foregroundColor,
+            fontSize: `${this.state.config.fontSize * 0.8}pt`,
+            fontWeight: 'normal',
+            textAlign: 'right',
+            width: '100%',
+          }}
+        >
+          👉 {post.handle} ({ moment(post.date).fromNow() })
+        </Text>
+        <Text
+          key={ ++key }
+          multiline
+          style={{
+            color: this.state.config.foregroundColor,
+            fontSize: `${this.state.config.fontSize}pt`,
+            fontWeight: 'bold',
+            textAlign: 'left',
+            width: '99%',
+          }}
+        >
+          { post.message }
+        </Text>
+        {links}
+      </View>);
+  }
+
   render() {
     const following = [];
     let posts = [];
@@ -131,36 +187,7 @@ export default class TwtxtClient extends Component {
     });
     posts = posts
       .sort((a,b) => b.date - a.date)
-      .map(p => <View
-        key={ ++key }
-      >
-        <Text
-          key={ ++key }
-          style={{
-            color: this.state.config.foregroundColor,
-            fontSize: `${this.state.config.fontSize * 0.8}pt`,
-            fontWeight: 'normal',
-            textAlign: 'right',
-            width: '100%',
-          }}
-        >
-          👉 {p.handle} ({ moment(p.date).fromNow() })
-        </Text>
-        <Text
-          key={ ++key }
-          multiline
-          style={{
-            color: this.state.config.foregroundColor,
-            fontSize: `${this.state.config.fontSize}pt`,
-            fontWeight: 'bold',
-            textAlign: 'left',
-            width: '99%',
-          }}
-        >
-          { p.message }
-        </Text>
-      </View>
-    );
+      .map(p => this.createMessageBlock(p, key += 5));
 
     return (
       <App>
