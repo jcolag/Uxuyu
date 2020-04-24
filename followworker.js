@@ -40,6 +40,10 @@ function postsFromLog(logData, handle) {
     .map(l => {
       const parts = l.split('\t').map(p => p.trim());
 
+      if (parts.length < 2) {
+        return null;
+      }
+
       return {
         date: new Date(parts[0]),
         message: parts[1]
@@ -51,6 +55,6 @@ function postsFromLog(logData, handle) {
     });
   return {
     handle: handle,
-    messages: posts,
+    messages: posts.filter(p => p !== null),
   };
 }

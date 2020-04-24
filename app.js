@@ -44,11 +44,13 @@ export default class TwtxtClient extends Component {
         },
       }
     );
+    let following = new Object();
 
     super(props);
     this.state = {
       config: config,
       following: twtxtconfig.following,
+      knownUsers: Object.assign(following, twtxtconfig.following),
       posts: {
         'nobody': [
           {
@@ -110,22 +112,44 @@ export default class TwtxtClient extends Component {
   createMessageBlock(post, key) {
     const urls = getUrls(post.message);
     const links = [];
+    const knownUsers = this.state.knownUsers;
 
-    urls.forEach(u => links.push(<Button
-      key={`link-${key++}`}
-      onPress={this.openUrl.bind(u.replace(/&[^;]*;$/, ''))}
-      style={{
-        border: `1px solid ${this.state.config.foregroundColor}`,
-        color: this.state.config.foregroundColor,
-        fontSize: `${this.state.config.fontSize}pt`,
-        fontWeight: 'normal',
-        textAlign: 'left',
-        width: '99%',
-      }}
-      title={u.replace(/&[^;]*;$/, '')}
-    />));
+    urls.forEach(u => {
+      if (u.indexOf('&gt;') > 0) {
+        let escaped = u.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); //]/
+        let tag = new RegExp(`@&lt;\\S* ${escaped}`);
+        let found = post.message.match(tag);
+
+        if (found !== null) {
+          const parts = found[0]
+            .replace(/^@&lt;/, '')
+            .replace(/&gt;.*/, '')
+            .split(' ');
+          if (!this.state.knownUsers.hasOwnProperty(parts[0])) {
+            this.state.knownUsers[parts[0]] = parts[1];
+          }
+        }
+      } else {
+        links.push(<Button
+          key={`link-${key++}`}
+          onPress={this.openUrl.bind(u)}
+          style={{
+            border: `1px solid ${this.state.config.foregroundColor}`,
+            color: this.state.config.foregroundColor,
+            fontSize: `${this.state.config.fontSize}pt`,
+            fontWeight: 'normal',
+            textAlign: 'left',
+            width: '99%',
+          }}
+          title={u}
+        />);
+      }
+    });
     return (<View
         key={ ++key }
+        style={{
+          paddingTop: `${this.state.config.fontSize / 2}pt`,
+        }}
       >
         <Text
           key={ ++key }
@@ -150,7 +174,8 @@ export default class TwtxtClient extends Component {
             width: '99%',
           }}
         >
-          { post.message }
+          { post.message
+              .replace(/@&lt;(\S*) \S*&gt;/g, (m, g, o, orig) => `@${g}`) }
         </Text>
         {links}
       </View>);
