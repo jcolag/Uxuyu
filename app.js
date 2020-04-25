@@ -90,7 +90,7 @@ export default class TwtxtClient extends Component {
   addFakeMessage(message, code) {
     const handle = this.state.twtxt.nick;
     const posts = this.state.posts;
-    const myPosts = posts[handle];
+    const myPosts = posts.hasOwnProperty(handle) ? posts[handle] : [];
 
     this.setState({
       posts: {},

@@ -12,25 +12,39 @@ const interval = setInterval(updatePosts, ms, parentPort, handles);
 updatePosts(parentPort, handles);
 
 function updatePosts(parentPort, handles) {
-  parentPort.postMessage(
-    postsFromLog(
-      fs.readFileSync(
-        workerData.twtxtConfig.twtfile, 'utf-8'
-      ),
-      workerData.twtxtConfig.nick
-    )
-  );
-  handles.forEach(h => {
-    const url = workerData.following[h];
+  try {
+    parentPort.postMessage(
+      postsFromLog(
+        fs.readFileSync(
+          workerData.twtxtConfig.twtfile, 'utf-8'
+        ),
+        workerData.twtxtConfig.nick
+      )
+    );
+    handles.forEach(h => {
+      const options = {
+        headers: {
+          'User-Agent': 'Uxuyu Prototype Testing',
+        },
+        url: workerData.following[h],
+      };
 
-    request(url, (err, res, body) => {
-      if (err) {
-        return;
+      request(options, (err, res, body) => {
+      try {
+        if (err) {
+          console.log(err);
+          return;
+        }
+
+        parentPort.postMessage(postsFromLog(body, h));
+      } catch(e) {
+        console.log(e);
       }
-
-      parentPort.postMessage(postsFromLog(body, h));
+      });
     });
-  });
+  } catch(e) {
+    console.log(e);
+  }
 }
 
 function postsFromLog(logData, handle) {
