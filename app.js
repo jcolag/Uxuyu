@@ -5,6 +5,7 @@ import {
   App,
   Button,
   Text,
+  TextInput,
   View,
   Window,
 } from "proton-native";
@@ -49,6 +50,7 @@ export default class TwtxtClient extends Component {
     super(props);
     this.state = {
       config: config,
+      defaultPostText: '',
       following: twtxtconfig.following,
       knownUsers: Object.assign(following, twtxtconfig.following),
       posts: {
@@ -62,6 +64,8 @@ export default class TwtxtClient extends Component {
       threadFollow: worker,
       twtxt: twtxtconfig.twtxt,
     };
+    this.postText = '';
+    this.boundPostTweet = this.postTweet.bind(this);
     worker.on('message', this.takeUpdate.bind(this));
     worker.on('error', this.reportUpdateError.bind(this));
     worker.on('exit', this.reportExit.bind(this));
@@ -107,6 +111,21 @@ export default class TwtxtClient extends Component {
 
   openUrl() {
     opn(this);
+  }
+
+  tweetUpdated(text) {
+    this.postText = text;
+  }
+
+  postTweet() {
+    console.log(this.postText);
+    this.setState({
+      defaultPostText: this.postText,
+    });
+    this.postText = '';
+    this.setState({
+      defaultPostText: '',
+    });
   }
 
   createMessageBlock(post, key) {
@@ -226,7 +245,7 @@ export default class TwtxtClient extends Component {
           <View style={{
             alignItems: 'flex-start',
             flex: 1,
-            flexDirection: 'row',
+            flexDirection: 'column',
             height: '100%',
             justifyContent: 'flex-start',
             width: '100%',
@@ -234,81 +253,126 @@ export default class TwtxtClient extends Component {
             <View style={{
               alignItems: 'flex-start',
               flex: 1,
-              flexDirection: 'column',
+              flexDirection: 'row',
               height: '100%',
               justifyContent: 'flex-start',
-              maxWidth: '250px',
-              width: '250px',
+              width: '100%',
             }}>
-              <Text
-                style={{
-                  color: this.state.config.foregroundColor,
-                  fontSize: `${this.state.config.fontSize * 1.25}pt`,
-                  fontWeight: 'bold',
-                  textAlign: 'left',
-                }}
-              >
-                Following
-              </Text>
               <View style={{
                 alignItems: 'flex-start',
                 flex: 1,
                 flexDirection: 'column',
+                height: '100%',
                 justifyContent: 'flex-start',
-                width: '100%',
+                maxWidth: '250px',
+                width: '250px',
               }}>
-                { following }
+                <Text
+                  style={{
+                    color: this.state.config.foregroundColor,
+                    fontSize: `${this.state.config.fontSize * 1.25}pt`,
+                    fontWeight: 'bold',
+                    textAlign: 'left',
+                  }}
+                >
+                  Following
+                </Text>
+                <View style={{
+                  alignItems: 'flex-start',
+                  flex: 1,
+                  flexDirection: 'column',
+                  justifyContent: 'flex-start',
+                  width: '100%',
+                }}>
+                  { following }
+                </View>
+                <Text
+                  style={{
+                    color: this.state.config.foregroundColor,
+                    fontSize: `${this.state.config.fontSize * 1.25}pt`,
+                    fontWeight: 'bold',
+                    textAlign: 'left',
+                  }}
+                >
+                  Mentions
+                </Text>
+                <View style={{
+                  alignItems: 'flex-start',
+                  flex: 1,
+                  flexDirection: 'column',
+                  justifyContent: 'flex-start',
+                  width: '100%',
+                }}>
+                  <Text
+                    style={{
+                      color: this.state.config.foregroundColor,
+                      fontSize: `${this.state.config.fontSize}pt`,
+                      fontWeight: 'bold',
+                      textAlign: 'left',
+                    }}
+                  >
+                    Test
+                  </Text>
+                </View>
               </View>
-              <Text
-                style={{
-                  color: this.state.config.foregroundColor,
-                  fontSize: `${this.state.config.fontSize * 1.25}pt`,
-                  fontWeight: 'bold',
-                  textAlign: 'left',
-                }}
-              >
-                Mentions
-              </Text>
               <View style={{
                 alignItems: 'flex-start',
                 flex: 1,
                 flexDirection: 'column',
+                height: '100%',
                 justifyContent: 'flex-start',
                 width: '100%',
               }}>
                 <Text
                   style={{
                     color: this.state.config.foregroundColor,
-                    fontSize: `${this.state.config.fontSize}pt`,
+                    fontSize: `${this.state.config.fontSize * 1.25}pt`,
                     fontWeight: 'bold',
                     textAlign: 'left',
                   }}
                 >
-                  Test
+                  Posts
                 </Text>
+                { posts }
               </View>
             </View>
-            <View style={{
+             <View style={{
               alignItems: 'flex-start',
+              backgroundColor: 'darkgreen',
               flex: 1,
-              flexDirection: 'column',
-              height: '100%',
+              flexDirection: 'row',
+              height: '40px',
               justifyContent: 'flex-start',
+              maxHeight: '40px',
               width: '100%',
             }}>
-              <Text
+              <TextInput
+                onChangeText={text => this.tweetUpdated(text)}
                 style={{
+                  backgroundColor: this.state.config.backgroundColor,
+                  border: '1px solid ' + this.state.config.foregroundColor,
                   color: this.state.config.foregroundColor,
-                  fontSize: `${this.state.config.fontSize * 1.25}pt`,
-                  fontWeight: 'bold',
-                  textAlign: 'left',
+                  fontSize: `${this.state.config.fontSize}pt`,
+                  height: '40px',
+                  width: '90%',
                 }}
-              >
-                Posts
-              </Text>
-              { posts }
+                value={this.state.defaultPostText}
+              />
+              <Button
+                onPress={this.boundPostTweet}
+                style={{
+                  backgroundColor: this.state.config.backgroundColor,
+                  border: '1px solid ' + this.state.config.foregroundColor,
+                  fontWeight: 'bold',
+                  color: this.state.config.foregroundColor,
+                  fontSize: `${this.state.config.fontSize}pt`,
+                  height: '40px',
+                  width: '10%',
+                }}
+                title='Post'
+              />
             </View>
-          </View>
+         </View>
         </Window>
       </App>
     );
