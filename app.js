@@ -3,19 +3,17 @@ import React, {
 } from "react";
 import {
   App,
-  Button,
   Text,
-  TextInput,
   View,
   Window,
 } from "proton-native";
+import Entry from "./entry";
+import MessageBlock from "./messageblock";
+import PanelFollow from "./panelfollow";
 
 const fs = require('fs');
-const getUrls = require('get-urls');
 const homedir = require('os').homedir();
 const ini = require('ini');
-const moment = require('moment');
-const opn = require('opn');
 const path = require('path');
 const { Worker } = require('worker_threads');
 
@@ -50,7 +48,6 @@ export default class TwtxtClient extends Component {
     super(props);
     this.state = {
       config: config,
-      defaultPostText: '',
       following: twtxtconfig.following,
       knownUsers: Object.assign(following, twtxtconfig.following),
       posts: {
@@ -65,7 +62,7 @@ export default class TwtxtClient extends Component {
       twtxt: twtxtconfig.twtxt,
     };
     this.postText = '';
-    this.boundPostTweet = this.postTweet.bind(this);
+    this.boundAddUser = this.addUser.bind(this);
     worker.on('message', this.takeUpdate.bind(this));
     worker.on('error', this.reportUpdateError.bind(this));
     worker.on('exit', this.reportExit.bind(this));
@@ -109,95 +106,15 @@ export default class TwtxtClient extends Component {
     });
   }
 
-  openUrl() {
-    opn(this);
-  }
+  addUser(parts) {
+    const user = {
+      name: parts[0],
+      address: parts[1],
+    };
 
-  tweetUpdated(text) {
-    this.postText = text;
-  }
-
-  postTweet() {
-    console.log(this.postText);
-    this.setState({
-      defaultPostText: this.postText,
-    });
-    this.postText = '';
-    this.setState({
-      defaultPostText: '',
-    });
-  }
-
-  createMessageBlock(post, key) {
-    const urls = getUrls(post.message);
-    const links = [];
-    const knownUsers = this.state.knownUsers;
-
-    urls.forEach(u => {
-      if (u.indexOf('&gt;') > 0) {
-        let escaped = u.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); //]/
-        let tag = new RegExp(`@&lt;\\S* ${escaped}`);
-        let found = post.message.match(tag);
-
-        if (found !== null) {
-          const parts = found[0]
-            .replace(/^@&lt;/, '')
-            .replace(/&gt;.*/, '')
-            .split(' ');
-          if (!this.state.knownUsers.hasOwnProperty(parts[0])) {
-            this.state.knownUsers[parts[0]] = parts[1];
-          }
-        }
-      } else {
-        links.push(<Button
-          key={`link-${key++}`}
-          onPress={this.openUrl.bind(u)}
-          style={{
-            border: `1px solid ${this.state.config.foregroundColor}`,
-            color: this.state.config.foregroundColor,
-            fontSize: `${this.state.config.fontSize}pt`,
-            fontWeight: 'normal',
-            textAlign: 'left',
-            width: '99%',
-          }}
-          title={u}
-        />);
-      }
-    });
-    return (<View
-        key={ ++key }
-        style={{
-          paddingTop: `${this.state.config.fontSize / 2}pt`,
-        }}
-      >
-        <Text
-          key={ ++key }
-          style={{
-            color: this.state.config.foregroundColor,
-            fontSize: `${this.state.config.fontSize * 0.8}pt`,
-            fontWeight: 'normal',
-            textAlign: 'right',
-            width: '100%',
-          }}
-        >
-          👉 {post.handle} ({ moment(post.date).fromNow() })
-        </Text>
-        <Text
-          key={ ++key }
-          multiline
-          style={{
-            color: this.state.config.foregroundColor,
-            fontSize: `${this.state.config.fontSize}pt`,
-            fontWeight: 'bold',
-            textAlign: 'left',
-            width: '99%',
-          }}
-        >
-          { post.message
-              .replace(/@&lt;(\S*) \S*&gt;/g, (m, g, o, orig) => `@${g}`) }
-        </Text>
-        {links}
-      </View>);
+    if (!this.state.knownUsers.hasOwnProperty(user.name)) {
+      this.state.knownUsers[user.name] = user.address;
+    }
   }
 
   render() {
@@ -231,7 +148,12 @@ export default class TwtxtClient extends Component {
     });
     posts = posts
       .sort((a,b) => b.date - a.date)
-      .map(p => this.createMessageBlock(p, key += 5));
+      .map(p => <MessageBlock
+        addUser={this.boundAddUser}
+        config={this.state.config}
+        key={key += 5}
+        post={p}
+      />);
 
     return (
       <App>
@@ -336,43 +258,10 @@ export default class TwtxtClient extends Component {
                 { posts }
               </View>
             </View>
-             <View style={{
-              alignItems: 'flex-start',
-              backgroundColor: 'darkgreen',
-              flex: 1,
-              flexDirection: 'row',
-              height: '40px',
-              justifyContent: 'flex-start',
-              maxHeight: '40px',
-              width: '100%',
-            }}>
-              <TextInput
-                onChangeText={text => this.tweetUpdated(text)}
-                style={{
-                  backgroundColor: this.state.config.backgroundColor,
-                  border: '1px solid ' + this.state.config.foregroundColor,
-                  color: this.state.config.foregroundColor,
-                  fontSize: `${this.state.config.fontSize}pt`,
-                  height: '40px',
-                  width: '90%',
-                }}
-                value={this.state.defaultPostText}
-              />
-              <Button
-                onPress={this.boundPostTweet}
-                style={{
-                  backgroundColor: this.state.config.backgroundColor,
-                  border: '1px solid ' + this.state.config.foregroundColor,
-                  fontWeight: 'bold',
-                  color: this.state.config.foregroundColor,
-                  fontSize: `${this.state.config.fontSize}pt`,
-                  height: '40px',
-                  width: '10%',
-                }}
-                title='Post'
-              />
-            </View>
-         </View>
+            <Entry
+              config={this.state.config}
+            />
+          </View>
         </Window>
       </App>
     );
