@@ -189,25 +189,10 @@ export default class TwtxtClient extends Component {
                 maxWidth: '250px',
                 width: '250px',
               }}>
-                <Text
-                  style={{
-                    color: this.state.config.foregroundColor,
-                    fontSize: `${this.state.config.fontSize * 1.25}pt`,
-                    fontWeight: 'bold',
-                    textAlign: 'left',
-                  }}
-                >
-                  Following
-                </Text>
-                <View style={{
-                  alignItems: 'flex-start',
-                  flex: 1,
-                  flexDirection: 'column',
-                  justifyContent: 'flex-start',
-                  width: '100%',
-                }}>
-                  { following }
-                </View>
+                <PanelFollow
+                  config={this.state.config}
+                  following={this.state.following}
+                />
                 <Text
                   style={{
                     color: this.state.config.foregroundColor,
