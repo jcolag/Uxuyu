@@ -58,11 +58,13 @@ export default class TwtxtClient extends Component {
           },
         ]
       },
+      showOnlyUser: null,
       threadFollow: worker,
       twtxt: twtxtconfig.twtxt,
     };
     this.postText = '';
     this.boundAddUser = this.addUser.bind(this);
+    this.boundSwitchUser = this.switchUser.bind(this);
     worker.on('message', this.takeUpdate.bind(this));
     worker.on('error', this.reportUpdateError.bind(this));
     worker.on('exit', this.reportExit.bind(this));
@@ -117,35 +119,28 @@ export default class TwtxtClient extends Component {
     }
   }
 
+  switchUser(user) {
+    this.setState({
+      showOnlyUser: user,
+    });
+  }
+
   render() {
-    const following = [];
+    const showUser = this.state.showOnlyUser;
     let posts = [];
     let key = 0;
 
-    Object.keys(this.state.following).forEach(f => {
-      following.push(
-        <Text
-          key={ ++key }
-          style={{
-            color: this.state.config.foregroundColor,
-            fontSize: `${this.state.config.fontSize}pt`,
-            fontWeight: 'bold',
-            textAlign: 'left',
-          }}
-        >
-          { f }
-        </Text>
-      );
-    });
-    Object.keys(this.state.posts).forEach(h => {
-      this.state.posts[h].forEach(p => {
-        posts.push({
-          date: p.date,
-          handle: h,
-          message: p.message,
+    Object.keys(this.state.posts)
+      .filter(h => showUser === null || h === showUser)
+      .forEach(h => {
+        this.state.posts[h].forEach(p => {
+          posts.push({
+            date: p.date,
+            handle: h,
+            message: p.message,
+          });
         });
       });
-    });
     posts = posts
       .sort((a,b) => b.date - a.date)
       .map(p => <MessageBlock
@@ -192,6 +187,8 @@ export default class TwtxtClient extends Component {
                 <PanelFollow
                   config={this.state.config}
                   following={this.state.following}
+                  owner={this.state.twtxt.nick}
+                  switchUser={this.boundSwitchUser}
                 />
                 <Text
                   style={{

@@ -2,6 +2,7 @@ import React, {
   Component,
 } from "react";
 import {
+  Button,
   Text,
   View,
 } from "proton-native";
@@ -11,25 +12,34 @@ export default class PanelFollow extends Component {
     super(props);
     this.state = {
     };
+    this.boundChangeUser = this.changeUser.bind(this);
+  }
+
+  changeUser(u) {
+    this.props.switchUser(u);
   }
 
   render() {
     const following = [];
+    const btnStyle = {
+      border: `1px solid ${this.props.config.foregroundColor}`,
+      borderRadius: `${this.props.config.fontSize / 2}px`,
+      color: this.props.config.foregroundColor,
+      fontSize: `${this.props.config.fontSize}pt`,
+      fontWeight: 'bold',
+      textAlign: 'center',
+      width: '98%',
+    };
     let key = 0;
 
     Object.keys(this.props.following).forEach(f => {
       following.push(
-        <Text
+        <Button
           key={ ++key }
-          style={{
-            color: this.props.config.foregroundColor,
-            fontSize: `${this.props.config.fontSize}pt`,
-            fontWeight: 'bold',
-            textAlign: 'left',
-          }}
-        >
-          { f }
-        </Text>
+          onPress={ _ => this.boundChangeUser(f) }
+          style={ btnStyle }
+          title={ f }
+        />
       );
     });
     return (
@@ -59,7 +69,19 @@ export default class PanelFollow extends Component {
           justifyContent: 'flex-start',
           width: '100%',
         }}>
+          <Button
+            key={ ++key }
+            onPress={ _ => this.boundChangeUser(this.props.owner) }
+            style={ btnStyle }
+            title={ `${this.props.owner} (you)` }
+          />
           { following }
+          <Button
+            key={ ++key }
+            onPress={ _ => this.boundChangeUser(null) }
+            style={ btnStyle }
+            title=' 👉 All Users 👈 '
+          />
         </View>
       </View>
     );
