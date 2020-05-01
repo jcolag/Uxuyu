@@ -36,7 +36,6 @@ export default class Entry extends Component {
     return (
       <View style={{
         alignItems: 'flex-start',
-        backgroundColor: 'darkgreen',
         flex: 1,
         flexDirection: 'row',
         height: '40px',

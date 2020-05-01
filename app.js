@@ -143,6 +143,7 @@ export default class TwtxtClient extends Component {
       });
     posts = posts
       .sort((a,b) => b.date - a.date)
+      .slice(0, this.state.twtxt.limit_timeline)
       .map(p => <MessageBlock
         addUser={this.boundAddUser}
         config={this.state.config}
