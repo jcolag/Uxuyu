@@ -51,7 +51,7 @@ export default class Entry extends Component {
             color: this.props.config.foregroundColor,
             fontSize: `${this.props.config.fontSize}pt`,
             height: '40px',
-            width: '90%',
+            width: '89%',
           }}
           value={this.state.defaultPostText}
         />
@@ -60,10 +60,12 @@ export default class Entry extends Component {
           style={{
             backgroundColor: this.props.config.backgroundColor,
             border: '1px solid ' + this.props.config.foregroundColor,
+            borderRadius: `${this.props.config.fontSize / 2}px`,
             fontWeight: 'bold',
             color: this.props.config.foregroundColor,
             fontSize: `${this.props.config.fontSize}pt`,
             height: '40px',
+            marginLeft: '0.5%',
             width: '10%',
           }}
           title='Post'

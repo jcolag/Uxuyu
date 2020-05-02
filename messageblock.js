@@ -47,11 +47,14 @@ export default class MessageBlock extends Component {
           onPress={this.openUrl.bind(u)}
           style={{
             border: `1px solid ${this.props.config.foregroundColor}`,
+            borderRadius: `${this.props.config.fontSize / 2}px`,
             color: this.props.config.foregroundColor,
             fontSize: `${this.props.config.fontSize}pt`,
             fontWeight: 'normal',
-            textAlign: 'left',
-            width: '99%',
+            marginLeft: '10%',
+            minWidth: '80%',
+            textAlign: 'center',
+            width: '80%',
           }}
           title={u}
         />);
