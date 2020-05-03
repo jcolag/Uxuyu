@@ -243,6 +243,7 @@ export default class TwtxtClient extends Component {
             </View>
             <Entry
               config={this.state.config}
+              twtxt={this.state.twtxt}
             />
           </View>
         </Window>

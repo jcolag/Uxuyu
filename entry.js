@@ -12,6 +12,7 @@ export default class Entry extends Component {
     super(props);
     this.state = {
       defaultPostText: '',
+      longMsg: false,
     };
     this.postText = '';
     this.boundPostTweet = this.postTweet.bind(this);
@@ -19,6 +20,10 @@ export default class Entry extends Component {
 
   tweetUpdated(text) {
     this.postText = text;
+    this.setState({
+      longMsg: this.postText.length >
+        Number(this.props.twtxt.character_warning),
+    });
   }
 
   postTweet() {
@@ -46,9 +51,13 @@ export default class Entry extends Component {
         <TextInput
           onChangeText={text => this.tweetUpdated(text)}
           style={{
-            backgroundColor: this.props.config.backgroundColor,
+            backgroundColor: this.state.longMsg
+              ? 'darkred'
+              : this.props.config.backgroundColor,
             border: '1px solid ' + this.props.config.foregroundColor,
-            color: this.props.config.foregroundColor,
+            color: this.state.longMsg
+              ? 'lightyellow'
+              : this.props.config.foregroundColor,
             fontSize: `${this.props.config.fontSize}pt`,
             height: '40px',
             width: '89%',
