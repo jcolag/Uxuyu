@@ -9,7 +9,7 @@ import {
 
 const getUrls = require('get-urls');
 const moment = require('moment');
-const opn = require('opn');
+const opn = require('open');
 
 export default class MessageBlock extends Component {
   constructor(props) {
