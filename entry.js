@@ -7,6 +7,10 @@ import {
   View,
 } from "proton-native";
 
+const fs = require('fs');
+const moment = require('moment');
+const opn = require('open');
+
 export default class Entry extends Component {
   constructor(props) {
     super(props);
@@ -27,7 +31,12 @@ export default class Entry extends Component {
   }
 
   postTweet() {
-    console.log(this.postText);
+    const ts = moment().format();
+
+    fs.appendFileSync(
+      this.props.twtxt.twtfile,
+      `${ts}\t${this.postText}`
+    );
     this.setState({
       defaultPostText: this.postText,
     });
@@ -35,6 +44,19 @@ export default class Entry extends Component {
     this.setState({
       defaultPostText: '',
     });
+    if (this.props.twtxt.hasOwnProperty('post_tweet_hook')
+      && this.props.twtxt.post_tweet_hook.length > 0) {
+      try {
+        opn(
+          this.props.twtxt.post_tweet_hook,
+          {
+            app: 'bash',
+          }
+        );
+      } catch(e) {
+        console.error(e);
+      }
+    }
   }
 
   render() {
