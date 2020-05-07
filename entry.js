@@ -32,10 +32,18 @@ export default class Entry extends Component {
 
   postTweet() {
     const ts = moment().format();
+    const feedFile = fs.readFileSync(
+      this.props.twtxt.twtfile,
+      'utf-8'
+    );
+    let post = `${ts}\t${this.postText}`;
 
+    if (!feedFile.endsWith('\n')) {
+      post = `\n${post}`;
+    }
     fs.appendFileSync(
       this.props.twtxt.twtfile,
-      `${ts}\t${this.postText}`
+      post
     );
     this.setState({
       defaultPostText: this.postText,
