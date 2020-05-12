@@ -36,7 +36,7 @@ export default class Entry extends Component {
       this.props.twtxt.twtfile,
       'utf-8'
     );
-    let post = `${ts}\t${this.postText}`;
+    let post = `${ts}\t${this.postText}\n`;
 
     if (!feedFile.endsWith('\n')) {
       post = `\n${post}`;
