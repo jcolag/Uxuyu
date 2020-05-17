@@ -33,13 +33,21 @@ export default class TwtxtClient extends Component {
       foregroundColor: 'white',
       minInterval: 15,
     };
-    const worker = new Worker(
+    const fworker = new Worker(
       './followworker.js',
       {
         workerData: {
           following: twtxtconfig.following,
           minInterval: Math.max(config.minInterval, 5),
           twtxtConfig: twtxtconfig.twtxt,
+        },
+      }
+    );
+    const pworker = new Worker(
+      './accountworker.js',
+      {
+        workerData: {
+          minInterval: Math.max(config.minInterval, 5),
         },
       }
     );
@@ -59,15 +67,22 @@ export default class TwtxtClient extends Component {
         ]
       },
       showOnlyUser: null,
-      threadFollow: worker,
+      threadFollow: fworker,
       twtxt: twtxtconfig.twtxt,
     };
     this.postText = '';
     this.boundAddUser = this.addUser.bind(this);
     this.boundSwitchUser = this.switchUser.bind(this);
-    worker.on('message', this.takeUpdate.bind(this));
-    worker.on('error', this.reportUpdateError.bind(this));
-    worker.on('exit', this.reportExit.bind(this));
+    fworker.on('message', this.takeUpdate.bind(this));
+    fworker.on('error', this.reportUpdateError.bind(this));
+    fworker.on('exit', this.reportExit.bind(this));
+    pworker.on('message', this.updateAccounts.bind(this));
+    pworker.on('error', this.reportUpdateError.bind(this));
+    pworker.on('exit', this.reportExit.bind(this));
+  }
+
+  updateAccounts(accountUpdate) {
+    console.log(accountUpdate);
   }
 
   takeUpdate(userUpdate) {
