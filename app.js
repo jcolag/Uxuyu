@@ -67,6 +67,7 @@ export default class TwtxtClient extends Component {
         ]
       },
       showOnlyUser: null,
+      threadAccount: pworker,
       threadFollow: fworker,
       twtxt: twtxtconfig.twtxt,
     };
@@ -132,6 +133,8 @@ export default class TwtxtClient extends Component {
     if (!this.state.knownUsers.hasOwnProperty(user.name)) {
       this.state.knownUsers[user.name] = user.address;
     }
+
+    this.state.threadAccount.postMessage(this.state.knownUsers);
   }
 
   switchUser(user) {

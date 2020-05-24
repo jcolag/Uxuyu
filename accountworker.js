@@ -13,6 +13,10 @@ const db = new sqlite3(dbSource, {
   verbose: console.log,
 });
 
+parentPort.on('message', (message) => {
+  // console.log(message);
+});
+
 try {
   const hasTableStmt = db.prepare(
     `SELECT name FROM sqlite_master WHERE type='table' AND name='${tableName}';`
