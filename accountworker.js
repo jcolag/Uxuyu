@@ -12,10 +12,7 @@ const dbSource = './uxuyu.db';
 const db = new sqlite3(dbSource, {
   verbose: console.log,
 });
-
-parentPort.on('message', (message) => {
-  // console.log(message);
-});
+const columns = 'handle, url, last_seen, last_post';
 
 try {
   const hasTableStmt = db.prepare(
@@ -34,8 +31,31 @@ try {
       );`
     );
     const createTable = createTableStmt.run();
-    console.log(JSON.stringify(createTable, ' ', 2));
   }
+
+  // Now that we definitely have a database, we can start using it
+  const checkStmt = db.prepare(
+    `SELECT ${columns} FROM ${tableName} WHERE handle = ?`
+  );
+  const insStmt = db.prepare(
+    `INSERT INTO ${tableName} (${columns}) VALUES (?, ?, ?, ?)`
+  );
+
+  parentPort.on('message', (userDict) => {
+    const handles = Object.keys(userDict);
+
+    handles.forEach(h => {
+      try {
+        const peer = checkStmt.get(h);
+
+        if (peer === null || typeof peer === 'undefined') {
+          insStmt.run(h, userDict[h], Date.now().valueOf(), 0);
+        }
+      } catch(he) {
+        console.log(he);
+      }
+    });
+  });
 } catch(e) {
   console.log(e);
 }

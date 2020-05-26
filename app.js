@@ -129,9 +129,13 @@ export default class TwtxtClient extends Component {
       name: parts[0],
       address: parts[1],
     };
+    const knownUsers = this.state.knownUsers;
 
     if (!this.state.knownUsers.hasOwnProperty(user.name)) {
-      this.state.knownUsers[user.name] = user.address;
+      knownUsers[user.name] = user.address;
+      this.setState({
+        knownUsers: knownUsers,
+      });
     }
 
     this.state.threadAccount.postMessage(this.state.knownUsers);
