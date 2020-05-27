@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React, {
   Component,
 } from "react";
@@ -96,3 +97,15 @@ export default class MessageBlock extends Component {
       </View>);
   }
 }
+MessageBlock.propTypes = {
+  addUser: PropTypes.func,
+  config: PropTypes.shape({
+    fontSize: PropTypes.number,
+    foregroundColor: PropTypes.string,
+  }),
+  post: PropTypes.shape({
+    date: PropTypes.date,
+    handle: PropTypes.string,
+    message: PropTypes.string,
+  }),
+};
