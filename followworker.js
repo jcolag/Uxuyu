@@ -7,6 +7,7 @@ const {
 
 const handles = Object.keys(workerData.following);
 const ms = workerData.minInterval * 60 * 1000;
+// eslint-disable-next-line no-unused-vars
 const interval = setInterval(updatePosts, ms, parentPort, handles);
 
 updatePosts(parentPort, handles);

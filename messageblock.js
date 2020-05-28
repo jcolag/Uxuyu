@@ -1,12 +1,12 @@
 import PropTypes from 'prop-types';
 import React, {
   Component,
-} from "react";
+} from 'react';
 import {
   Button,
   Text,
   View,
-} from "proton-native";
+} from 'proton-native';
 
 const getUrls = require('get-urls');
 const moment = require('moment');
@@ -91,7 +91,7 @@ export default class MessageBlock extends Component {
           }}
         >
           { post.message
-              .replace(/@&lt;(\S*) \S*&gt;/g, (m, g, o, orig) => `@${g}`) }
+              .replace(/@&lt;(\S*) \S*&gt;/g, (m, g) => `@${g}`) }
         </Text>
         {links}
       </View>);

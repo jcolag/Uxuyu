@@ -1,11 +1,12 @@
+import PropTypes from 'prop-types';
 import React, {
   Component,
-} from "react";
+} from 'react';
 import {
   Button,
   Text,
   View,
-} from "proton-native";
+} from 'proton-native';
 
 export default class PanelFollow extends Component {
   constructor(props) {
@@ -36,7 +37,7 @@ export default class PanelFollow extends Component {
       following.push(
         <Button
           key={ ++key }
-          onPress={ _ => this.boundChangeUser(f) }
+          onPress={ () => this.boundChangeUser(f) }
           style={ btnStyle }
           title={ f }
         />
@@ -71,14 +72,14 @@ export default class PanelFollow extends Component {
         }}>
           <Button
             key={ ++key }
-            onPress={ _ => this.boundChangeUser(this.props.owner) }
+            onPress={ () => this.boundChangeUser(this.props.owner) }
             style={ btnStyle }
             title={ `${this.props.owner} (you)` }
           />
           { following }
           <Button
             key={ ++key }
-            onPress={ _ => this.boundChangeUser(null) }
+            onPress={ () => this.boundChangeUser(null) }
             style={ btnStyle }
             title=' 👉 All Users 👈 '
           />
@@ -87,3 +88,12 @@ export default class PanelFollow extends Component {
     );
   }
 }
+PanelFollow.propTypes = {
+  config: PropTypes.shape({
+    fontSize: PropTypes.number,
+    foregroundColor: PropTypes.string,
+  }),
+  following: PropTypes.object,
+  owner: PropTypes.string,
+  switchUser: PropTypes.func,
+};

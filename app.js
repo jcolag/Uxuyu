@@ -1,15 +1,15 @@
 import React, {
   Component,
-} from "react";
+} from 'react';
 import {
   App,
   Text,
   View,
   Window,
-} from "proton-native";
-import Entry from "./entry";
-import MessageBlock from "./messageblock";
-import PanelFollow from "./panelfollow";
+} from 'proton-native';
+import Entry from './entry';
+import MessageBlock from './messageblock';
+import PanelFollow from './panelfollow';
 
 const fs = require('fs');
 const homedir = require('os').homedir();
@@ -109,7 +109,7 @@ export default class TwtxtClient extends Component {
   addFakeMessage(message, code) {
     const handle = this.state.twtxt.nick;
     const posts = this.state.posts;
-    const myPosts = posts.hasOwnProperty(handle) ? posts[handle] : [];
+    const myPosts = Object.prototype.hasOwnProperty.call(posts, handle) ? posts[handle] : [];
 
     this.setState({
       posts: {},
@@ -131,7 +131,7 @@ export default class TwtxtClient extends Component {
     };
     const knownUsers = this.state.knownUsers;
 
-    if (!this.state.knownUsers.hasOwnProperty(user.name)) {
+    if (!Object.prototype.hasOwnProperty.call(this.state.knownUsers, user.name)) {
       knownUsers[user.name] = user.address;
       this.setState({
         knownUsers: knownUsers,

@@ -1,11 +1,12 @@
+import PropTypes from 'prop-types';
 import React, {
   Component,
-} from "react";
+} from 'react';
 import {
   Button,
   TextInput,
   View,
-} from "proton-native";
+} from 'proton-native';
 
 const fs = require('fs');
 const moment = require('moment');
@@ -52,7 +53,7 @@ export default class Entry extends Component {
     this.setState({
       defaultPostText: '',
     });
-    if (this.props.twtxt.hasOwnProperty('post_tweet_hook')
+    if (Object.prototype.hasOwnProperty.call(this.props.twtxt, 'post_tweet_hook')
       && this.props.twtxt.post_tweet_hook.length > 0) {
       try {
         opn(
@@ -113,3 +114,17 @@ export default class Entry extends Component {
     );
   }
 }
+Entry.propTypes = {
+  config: PropTypes.shape({
+    backgroundColor: PropTypes.string,
+    fontSize: PropTypes.number,
+    foregroundColor: PropTypes.string,
+  }),
+  twtxt: PropTypes.shape({
+    // eslint-disable-next-line camelcase
+    character_warning: PropTypes.string,
+    // eslint-disable-next-line camelcase
+    post_tweet_hook: PropTypes.string,
+    twtfile: PropTypes.string,
+  }),
+};
