@@ -19,6 +19,7 @@
         "sourceType": "module"
     },
     "plugins": [
+        "prettier",
         "react"
     ],
     "rules": {
@@ -277,6 +278,7 @@
         "prefer-rest-params": "error",
         "prefer-spread": "error",
         "prefer-template": "off",
+        "prettier/prettier": "error",
         "quote-props": "off",
         "quotes": [
           "error",

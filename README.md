@@ -8,3 +8,9 @@ Basically, the only way to find people you might want to talk to or to find peop
 The easiest solution that comes to mind is to handle the registry and analysis work on the client side, with an application to regularly download all known feeds, "harvest" the information, show the user what they follow, but also note when there's something else that the user should see.
 
 This is a prototype for that idea, using [Proton Native](https://proton-native.js.org/#/) for the user interface alongside Node.js's [worker threads](https://nodejs.org/api/worker_threads.html) to avoid blocking the interface where possible.
+
+## Contributions
+
+I'll take (almost) all the help I can get!
+
+I do, however, ask that you squeeze out all the ESLint and Prettier warnings before submitting a patch, only disabling the warnings in extreme cases.  Good examples would include tolerating variables that will definitely be used in the near future or cases where the two styles conflict.
