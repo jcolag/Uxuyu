@@ -1,9 +1,6 @@
 const fs = require('fs');
 const request = require('request');
-const {
-  parentPort,
-  workerData,
-} = require('worker_threads');
+const { parentPort, workerData } = require('worker_threads');
 
 const handles = Object.keys(workerData.following);
 const ms = workerData.minInterval * 60 * 1000;
@@ -16,13 +13,11 @@ function updatePosts(parentPort, handles) {
   try {
     parentPort.postMessage(
       postsFromLog(
-        fs.readFileSync(
-          workerData.twtxtConfig.twtfile, 'utf-8'
-        ),
+        fs.readFileSync(workerData.twtxtConfig.twtfile, 'utf-8'),
         workerData.twtxtConfig.nick
       )
     );
-    handles.forEach(h => {
+    handles.forEach((h) => {
       const options = {
         headers: {
           'User-Agent': 'Uxuyu Prototype Testing',
@@ -31,19 +26,19 @@ function updatePosts(parentPort, handles) {
       };
 
       request(options, (err, res, body) => {
-      try {
-        if (err) {
-          console.log(err);
-          return;
-        }
+        try {
+          if (err) {
+            console.log(err);
+            return;
+          }
 
-        parentPort.postMessage(postsFromLog(body, h));
-      } catch(e) {
-        console.log(e);
-      }
+          parentPort.postMessage(postsFromLog(body, h));
+        } catch (e) {
+          console.log(e);
+        }
       });
     });
-  } catch(e) {
+  } catch (e) {
     console.log(e);
   }
 }
@@ -51,9 +46,9 @@ function updatePosts(parentPort, handles) {
 function postsFromLog(logData, handle) {
   const posts = logData
     .split('\n')
-    .filter(l => l.trim().length > 0 && l.trim()[0] !== '#')
-    .map(l => {
-      const parts = l.split('\t').map(p => p.trim());
+    .filter((l) => l.trim().length > 0 && l.trim()[0] !== '#')
+    .map((l) => {
+      const parts = l.split('\t').map((p) => p.trim());
 
       if (parts.length < 2) {
         return null;
@@ -61,15 +56,20 @@ function postsFromLog(logData, handle) {
 
       return {
         date: new Date(parts[0]),
-        message: parts[1]
-          .replace(/[<>]/g, tag => ({
-            '<': '&lt;',
-            '>': '&gt;',
-          }[tag] || tag)),
+        message: parts[1].replace(
+          /[<>]/g,
+          // Prettier is fighting with ESLint over whether to force the replacement
+          // object on a new line or not.  So...
+          // eslint-disable-next-line prettier/prettier
+          (tag) => ({
+              '<': '&lt;',
+              '>': '&gt;',
+            }[tag] || tag)
+        ),
       };
     });
   return {
     handle: handle,
-    messages: posts.filter(p => p !== null),
+    messages: posts.filter((p) => p !== null),
   };
 }

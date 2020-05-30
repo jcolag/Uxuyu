@@ -1,12 +1,5 @@
-import React, {
-  Component,
-} from 'react';
-import {
-  App,
-  Text,
-  View,
-  Window,
-} from 'proton-native';
+import React, { Component } from 'react';
+import { App, Text, View, Window } from 'proton-native';
 import Entry from './entry';
 import MessageBlock from './messageblock';
 import PanelFollow from './panelfollow';
@@ -18,10 +11,7 @@ const path = require('path');
 const { Worker } = require('worker_threads');
 
 const twtxtconfig = ini.parse(
-  fs.readFileSync(
-    path.join(homedir, '.config', 'twtxt', 'config'),
-    'utf-8'
-  )
+  fs.readFileSync(path.join(homedir, '.config', 'twtxt', 'config'), 'utf-8')
 );
 
 export default class TwtxtClient extends Component {
@@ -33,24 +23,18 @@ export default class TwtxtClient extends Component {
       foregroundColor: 'white',
       minInterval: 15,
     };
-    const fworker = new Worker(
-      './followworker.js',
-      {
-        workerData: {
-          following: twtxtconfig.following,
-          minInterval: Math.max(config.minInterval, 5),
-          twtxtConfig: twtxtconfig.twtxt,
-        },
-      }
-    );
-    const pworker = new Worker(
-      './accountworker.js',
-      {
-        workerData: {
-          minInterval: Math.max(config.minInterval, 5),
-        },
-      }
-    );
+    const fworker = new Worker('./followworker.js', {
+      workerData: {
+        following: twtxtconfig.following,
+        minInterval: Math.max(config.minInterval, 5),
+        twtxtConfig: twtxtconfig.twtxt,
+      },
+    });
+    const pworker = new Worker('./accountworker.js', {
+      workerData: {
+        minInterval: Math.max(config.minInterval, 5),
+      },
+    });
     let following = new Object();
 
     super(props);
@@ -59,12 +43,12 @@ export default class TwtxtClient extends Component {
       following: twtxtconfig.following,
       knownUsers: Object.assign(following, twtxtconfig.following),
       posts: {
-        'nobody': [
+        nobody: [
           {
             date: new Date('0001-01-01'),
             message: 'The dawn of time...',
           },
-        ]
+        ],
       },
       showOnlyUser: null,
       threadAccount: pworker,
@@ -109,7 +93,9 @@ export default class TwtxtClient extends Component {
   addFakeMessage(message, code) {
     const handle = this.state.twtxt.nick;
     const posts = this.state.posts;
-    const myPosts = Object.prototype.hasOwnProperty.call(posts, handle) ? posts[handle] : [];
+    const myPosts = Object.prototype.hasOwnProperty.call(posts, handle)
+      ? posts[handle]
+      : [];
 
     this.setState({
       posts: {},
@@ -131,7 +117,9 @@ export default class TwtxtClient extends Component {
     };
     const knownUsers = this.state.knownUsers;
 
-    if (!Object.prototype.hasOwnProperty.call(this.state.knownUsers, user.name)) {
+    if (
+      !Object.prototype.hasOwnProperty.call(this.state.knownUsers, user.name)
+    ) {
       knownUsers[user.name] = user.address;
       this.setState({
         knownUsers: knownUsers,
@@ -153,9 +141,9 @@ export default class TwtxtClient extends Component {
     let key = 0;
 
     Object.keys(this.state.posts)
-      .filter(h => showUser === null || h === showUser)
-      .forEach(h => {
-        this.state.posts[h].forEach(p => {
+      .filter((h) => showUser === null || h === showUser)
+      .forEach((h) => {
+        this.state.posts[h].forEach((p) => {
           posts.push({
             date: p.date,
             handle: h,
@@ -164,14 +152,16 @@ export default class TwtxtClient extends Component {
         });
       });
     posts = posts
-      .sort((a,b) => b.date - a.date)
+      .sort((a, b) => b.date - a.date)
       .slice(0, this.state.twtxt.limit_timeline)
-      .map(p => <MessageBlock
-        addUser={this.boundAddUser}
-        config={this.state.config}
-        key={key += 5}
-        post={p}
-      />);
+      .map((p) => (
+        <MessageBlock
+          addUser={this.boundAddUser}
+          config={this.state.config}
+          key={(key += 5)}
+          post={p}
+        />
+      ));
 
     return (
       <App>
@@ -182,31 +172,37 @@ export default class TwtxtClient extends Component {
             width: '75%',
           }}
         >
-          <View style={{
-            alignItems: 'flex-start',
-            flex: 1,
-            flexDirection: 'column',
-            height: '100%',
-            justifyContent: 'flex-start',
-            width: '100%',
-          }}>
-            <View style={{
+          <View
+            style={{
               alignItems: 'flex-start',
               flex: 1,
-              flexDirection: 'row',
+              flexDirection: 'column',
               height: '100%',
               justifyContent: 'flex-start',
               width: '100%',
-            }}>
-              <View style={{
+            }}
+          >
+            <View
+              style={{
                 alignItems: 'flex-start',
                 flex: 1,
-                flexDirection: 'column',
+                flexDirection: 'row',
                 height: '100%',
                 justifyContent: 'flex-start',
-                maxWidth: '250px',
-                width: '250px',
-              }}>
+                width: '100%',
+              }}
+            >
+              <View
+                style={{
+                  alignItems: 'flex-start',
+                  flex: 1,
+                  flexDirection: 'column',
+                  height: '100%',
+                  justifyContent: 'flex-start',
+                  maxWidth: '250px',
+                  width: '250px',
+                }}
+              >
                 <PanelFollow
                   config={this.state.config}
                   following={this.state.following}
@@ -223,13 +219,15 @@ export default class TwtxtClient extends Component {
                 >
                   Mentions
                 </Text>
-                <View style={{
-                  alignItems: 'flex-start',
-                  flex: 1,
-                  flexDirection: 'column',
-                  justifyContent: 'flex-start',
-                  width: '100%',
-                }}>
+                <View
+                  style={{
+                    alignItems: 'flex-start',
+                    flex: 1,
+                    flexDirection: 'column',
+                    justifyContent: 'flex-start',
+                    width: '100%',
+                  }}
+                >
                   <Text
                     style={{
                       color: this.state.config.foregroundColor,
@@ -242,14 +240,16 @@ export default class TwtxtClient extends Component {
                   </Text>
                 </View>
               </View>
-              <View style={{
-                alignItems: 'flex-start',
-                flex: 1,
-                flexDirection: 'column',
-                height: '100%',
-                justifyContent: 'flex-start',
-                width: '100%',
-              }}>
+              <View
+                style={{
+                  alignItems: 'flex-start',
+                  flex: 1,
+                  flexDirection: 'column',
+                  height: '100%',
+                  justifyContent: 'flex-start',
+                  width: '100%',
+                }}
+              >
                 <Text
                   style={{
                     color: this.state.config.foregroundColor,
@@ -260,13 +260,10 @@ export default class TwtxtClient extends Component {
                 >
                   Posts
                 </Text>
-                { posts }
+                {posts}
               </View>
             </View>
-            <Entry
-              config={this.state.config}
-              twtxt={this.state.twtxt}
-            />
+            <Entry config={this.state.config} twtxt={this.state.twtxt} />
           </View>
         </Window>
       </App>

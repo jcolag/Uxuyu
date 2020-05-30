@@ -1,18 +1,11 @@
 import PropTypes from 'prop-types';
-import React, {
-  Component,
-} from 'react';
-import {
-  Button,
-  Text,
-  View,
-} from 'proton-native';
+import React, { Component } from 'react';
+import { Button, Text, View } from 'proton-native';
 
 export default class PanelFollow extends Component {
   constructor(props) {
     super(props);
-    this.state = {
-    };
+    this.state = {};
     this.boundChangeUser = this.changeUser.bind(this);
   }
 
@@ -33,26 +26,28 @@ export default class PanelFollow extends Component {
     };
     let key = 0;
 
-    Object.keys(this.props.following).forEach(f => {
+    Object.keys(this.props.following).forEach((f) => {
       following.push(
         <Button
-          key={ ++key }
-          onPress={ () => this.boundChangeUser(f) }
-          style={ btnStyle }
-          title={ f }
+          key={++key}
+          onPress={() => this.boundChangeUser(f)}
+          style={btnStyle}
+          title={f}
         />
       );
     });
     return (
-      <View style={{
-        alignItems: 'flex-start',
-        flex: 1,
-        flexDirection: 'column',
-        height: '100%',
-        justifyContent: 'flex-start',
-        maxWidth: '250px',
-        width: '250px',
-      }}>
+      <View
+        style={{
+          alignItems: 'flex-start',
+          flex: 1,
+          flexDirection: 'column',
+          height: '100%',
+          justifyContent: 'flex-start',
+          maxWidth: '250px',
+          width: '250px',
+        }}
+      >
         <Text
           style={{
             color: this.props.config.foregroundColor,
@@ -63,24 +58,26 @@ export default class PanelFollow extends Component {
         >
           Following
         </Text>
-        <View style={{
-          alignItems: 'flex-start',
-          flex: 1,
-          flexDirection: 'column',
-          justifyContent: 'flex-start',
-          width: '100%',
-        }}>
+        <View
+          style={{
+            alignItems: 'flex-start',
+            flex: 1,
+            flexDirection: 'column',
+            justifyContent: 'flex-start',
+            width: '100%',
+          }}
+        >
           <Button
-            key={ ++key }
-            onPress={ () => this.boundChangeUser(this.props.owner) }
-            style={ btnStyle }
-            title={ `${this.props.owner} (you)` }
+            key={++key}
+            onPress={() => this.boundChangeUser(this.props.owner)}
+            style={btnStyle}
+            title={`${this.props.owner} (you)`}
           />
-          { following }
+          {following}
           <Button
-            key={ ++key }
-            onPress={ () => this.boundChangeUser(null) }
-            style={ btnStyle }
+            key={++key}
+            onPress={() => this.boundChangeUser(null)}
+            style={btnStyle}
             title=' 👉 All Users 👈 '
           />
         </View>

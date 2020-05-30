@@ -1,12 +1,6 @@
 import PropTypes from 'prop-types';
-import React, {
-  Component,
-} from 'react';
-import {
-  Button,
-  TextInput,
-  View,
-} from 'proton-native';
+import React, { Component } from 'react';
+import { Button, TextInput, View } from 'proton-native';
 
 const fs = require('fs');
 const moment = require('moment');
@@ -26,26 +20,20 @@ export default class Entry extends Component {
   tweetUpdated(text) {
     this.postText = text;
     this.setState({
-      longMsg: this.postText.length >
-        Number(this.props.twtxt.character_warning),
+      longMsg:
+        this.postText.length > Number(this.props.twtxt.character_warning),
     });
   }
 
   postTweet() {
     const ts = moment().format();
-    const feedFile = fs.readFileSync(
-      this.props.twtxt.twtfile,
-      'utf-8'
-    );
+    const feedFile = fs.readFileSync(this.props.twtxt.twtfile, 'utf-8');
     let post = `${ts}\t${this.postText}\n`;
 
     if (!feedFile.endsWith('\n')) {
       post = `\n${post}`;
     }
-    fs.appendFileSync(
-      this.props.twtxt.twtfile,
-      post
-    );
+    fs.appendFileSync(this.props.twtxt.twtfile, post);
     this.setState({
       defaultPostText: this.postText,
     });
@@ -53,16 +41,18 @@ export default class Entry extends Component {
     this.setState({
       defaultPostText: '',
     });
-    if (Object.prototype.hasOwnProperty.call(this.props.twtxt, 'post_tweet_hook')
-      && this.props.twtxt.post_tweet_hook.length > 0) {
+    if (
+      Object.prototype.hasOwnProperty.call(
+        this.props.twtxt,
+        'post_tweet_hook'
+      ) &&
+      this.props.twtxt.post_tweet_hook.length > 0
+    ) {
       try {
-        opn(
-          this.props.twtxt.post_tweet_hook,
-          {
-            app: 'bash',
-          }
-        );
-      } catch(e) {
+        opn(this.props.twtxt.post_tweet_hook, {
+          app: 'bash',
+        });
+      } catch (e) {
         console.error(e);
       }
     }
@@ -70,17 +60,19 @@ export default class Entry extends Component {
 
   render() {
     return (
-      <View style={{
-        alignItems: 'flex-start',
-        flex: 1,
-        flexDirection: 'row',
-        height: '40px',
-        justifyContent: 'flex-start',
-        maxHeight: '40px',
-        width: '100%',
-      }}>
+      <View
+        style={{
+          alignItems: 'flex-start',
+          flex: 1,
+          flexDirection: 'row',
+          height: '40px',
+          justifyContent: 'flex-start',
+          maxHeight: '40px',
+          width: '100%',
+        }}
+      >
         <TextInput
-          onChangeText={text => this.tweetUpdated(text)}
+          onChangeText={(text) => this.tweetUpdated(text)}
           style={{
             backgroundColor: this.state.longMsg
               ? 'darkred'

@@ -1,10 +1,8 @@
-const {
-  parentPort,
-  workerData,
-} = require('worker_threads');
+const { parentPort, workerData } = require('worker_threads');
 const sqlite3 = require('better-sqlite3');
 
-const ms = workerData.minInterval * 60 * 1000 / 3;
+const ms = (workerData.minInterval * 60 * 1000) / 3;
+// eslint-disable-next-line no-unused-vars
 const interval = setInterval(statusCheck, ms, parentPort);
 const tableName = 'peers';
 const dbSource = './uxuyu.db';
@@ -29,6 +27,7 @@ try {
         last_post INTEGER
       );`
     );
+    // eslint-disable-next-line no-unused-vars
     const createTable = createTableStmt.run();
   }
 
@@ -43,25 +42,24 @@ try {
   parentPort.on('message', (userDict) => {
     const handles = Object.keys(userDict);
 
-    handles.forEach(h => {
+    handles.forEach((h) => {
       try {
         const peer = checkStmt.get(h);
 
         if (peer === null || typeof peer === 'undefined') {
           insStmt.run(h, userDict[h], Date.now().valueOf(), 0);
         }
-      } catch(he) {
+      } catch (he) {
         console.log(he);
       }
     });
   });
-} catch(e) {
+} catch (e) {
   console.log(e);
 }
 
 function statusCheck(parentPort) {
   try {
-    console.log('status');
-  } catch(e) {
-  }
+    console.log(parentPort);
+  } catch (e) {}
 }
