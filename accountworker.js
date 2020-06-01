@@ -3,13 +3,14 @@ const sqlite3 = require('better-sqlite3');
 
 const ms = (workerData.minInterval * 60 * 1000) / 3;
 // eslint-disable-next-line no-unused-vars
-const interval = setInterval(statusCheck, ms, parentPort);
+const interval = setInterval(updateAccounts, ms, parentPort);
 const tableName = 'peers';
 const dbSource = './uxuyu.db';
 const db = new sqlite3(dbSource, {
   verbose: console.log,
 });
 const columns = 'handle, url, last_seen, last_post';
+let selectAllStmt;
 
 try {
   const hasTableStmt = db.prepare(
@@ -38,6 +39,7 @@ try {
   const insStmt = db.prepare(
     `INSERT INTO ${tableName} (${columns}) VALUES (?, ?, ?, ?)`
   );
+  selectAllStmt = db.prepare(`SELECT ${columns} FROM ${tableName}`);
 
   parentPort.on('message', (userDict) => {
     const handles = Object.keys(userDict);
@@ -58,8 +60,17 @@ try {
   console.log(e);
 }
 
-function statusCheck(parentPort) {
+function updateAccounts(parentPort) {
   try {
-    console.log(parentPort);
+    let peers = selectAllStmt.all().map((r) => {
+      return {
+        handle: r.handle,
+        url: r.url,
+        lastSeen: r.last_seen,
+        lastPost: r.last_post,
+        following: false,
+      };
+    });
+    parentPort.postMessage(peers);
   } catch (e) {}
 }
