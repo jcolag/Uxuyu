@@ -7,10 +7,10 @@ const interval = setInterval(updateAccounts, ms, parentPort);
 const tableName = 'peers';
 const dbSource = './uxuyu.db';
 const db = new sqlite3(dbSource, {
-  verbose: console.log,
+  verbose: null,
 });
 const columns = 'handle, url, last_seen, last_post';
-let selectAllStmt;
+let selectAllStmt = '';
 
 try {
   const hasTableStmt = db.prepare(
@@ -18,7 +18,6 @@ try {
   );
   const hasTable = hasTableStmt.all();
 
-  console.log(JSON.stringify(hasTable, ' ', 2));
   if (hasTable.length === 0) {
     const createTableStmt = db.prepare(
       `CREATE TABLE ${tableName} (
@@ -28,8 +27,7 @@ try {
         last_post INTEGER
       );`
     );
-    // eslint-disable-next-line no-unused-vars
-    const createTable = createTableStmt.run();
+    createTableStmt.run();
   }
 
   // Now that we definitely have a database, we can start using it
@@ -62,15 +60,13 @@ try {
 
 function updateAccounts(parentPort) {
   try {
-    let peers = selectAllStmt.all().map((r) => {
-      return {
-        handle: r.handle,
-        url: r.url,
-        lastSeen: r.last_seen,
-        lastPost: r.last_post,
-        following: false,
-      };
-    });
+    let peers = selectAllStmt.all().map((r) => ({
+      handle: r.handle,
+      url: r.url,
+      lastSeen: r.last_seen,
+      lastPost: r.last_post,
+      following: false,
+    }));
     parentPort.postMessage(peers);
   } catch (e) {}
 }
