@@ -41,7 +41,7 @@ export default class TwtxtClient extends Component {
     this.state = {
       config: config,
       following: twtxtconfig.following,
-      knownUsers: Object.assign(following, twtxtconfig.following),
+      knownPeers: Object.assign(following, twtxtconfig.following),
       posts: {
         nobody: [
           {
@@ -67,7 +67,20 @@ export default class TwtxtClient extends Component {
   }
 
   updateAccounts(accountUpdate) {
-    console.log(accountUpdate);
+    for (let i = 0; i < accountUpdate.length; i++) {
+      const match = this.state.following.filter(
+        (f) => f.handle === accountUpdate[i].handle
+      );
+
+      if (match.length > 0) {
+        accountUpdate[i].following = true;
+      }
+    }
+
+    this.setState({
+      knownPeers: accountUpdate,
+    });
+    this.state.threadFollow.postMessage(accountUpdate);
   }
 
   takeUpdate(userUpdate) {
@@ -115,18 +128,18 @@ export default class TwtxtClient extends Component {
       name: parts[0],
       address: parts[1],
     };
-    const knownUsers = this.state.knownUsers;
+    const knownPeers = this.state.knownPeers;
 
     if (
-      !Object.prototype.hasOwnProperty.call(this.state.knownUsers, user.name)
+      !Object.prototype.hasOwnProperty.call(this.state.knownPeers, user.name)
     ) {
-      knownUsers[user.name] = user.address;
+      knownPeers[user.name] = user.address;
       this.setState({
-        knownUsers: knownUsers,
+        knownPeers: knownPeers,
       });
     }
 
-    this.state.threadAccount.postMessage(this.state.knownUsers);
+    this.state.threadAccount.postMessage(this.state.knownPeers);
   }
 
   switchUser(user) {
