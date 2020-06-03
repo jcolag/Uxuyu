@@ -6,6 +6,7 @@ import PanelFollow from './panelfollow';
 import PanelMention from './panelmention';
 
 const fs = require('fs');
+const getUrls = require('get-urls');
 const homedir = require('os').homedir();
 const ini = require('ini');
 const path = require('path');
@@ -48,6 +49,7 @@ export default class TwtxtClient extends Component {
           {
             date: new Date('0001-01-01'),
             message: 'The dawn of time...',
+            urls: [],
           },
         ],
       },
@@ -86,6 +88,37 @@ export default class TwtxtClient extends Component {
 
   takeUpdate(userUpdate) {
     const posts = this.state.posts;
+
+    for (let i = 0; i < userUpdate.messages.length; i++) {
+      const message = userUpdate.messages[i].message;
+      const urls = getUrls(message);
+
+      // Some URLs are actually feeds.  Those shouldn't be included, but should
+      // be added to the list of known peer accounts.
+      urls.forEach((u) => {
+        if (u.indexOf('&gt;') > 0) {
+          let escaped = u.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); //]/
+          let tag = new RegExp(`@&lt;\\S* ${escaped}`);
+          let found = message.match(tag);
+
+          if (found !== null) {
+            const parts = found[0]
+              .replace(/^@&lt;/, '')
+              .replace(/&gt;.*/, '')
+              .split(' ');
+            this.addUser(parts);
+            if (parts[0] === this.state.twtxt.nick) {
+              console.log(
+                `Got one from ${userUpdate.handle} at ${userUpdate.messages[i].date}`
+              );
+            }
+          }
+        }
+      });
+      userUpdate.messages[i].urls = Array.from(urls).filter(
+        (u) => u.indexOf('&gt;') < 0
+      );
+    }
 
     this.setState({
       posts: {},
@@ -162,6 +195,7 @@ export default class TwtxtClient extends Component {
             date: p.date,
             handle: h,
             message: p.message,
+            urls: p.urls,
           });
         });
       });
