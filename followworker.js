@@ -7,7 +7,7 @@ let knownPeers = workerData.following;
 let handles = Object.keys(knownPeers);
 // eslint-disable-next-line no-unused-vars
 const interval = setInterval(updatePosts, ms, parentPort, handles);
-let iterations = 0;
+let iterations = 1;
 
 updatePosts(parentPort, handles);
 parentPort.on('message', updateFollowing);
@@ -84,7 +84,8 @@ function postsFromLog(logData, handle) {
     });
   return {
     following:
-      handle === workerData.twtxtConfig.nick || knownPeers[handle].following,
+      handle === workerData.twtxtConfig.nick ||
+      Object.prototype.hasOwnProperty.call(knownPeers, handle),
     handle: handle,
     messages: posts.filter((p) => p !== null),
   };

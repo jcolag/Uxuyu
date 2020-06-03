@@ -3,6 +3,7 @@ import { App, Text, View, Window } from 'proton-native';
 import Entry from './entry';
 import MessageBlock from './messageblock';
 import PanelFollow from './panelfollow';
+import PanelMention from './panelmention';
 
 const fs = require('fs');
 const homedir = require('os').homedir();
@@ -222,36 +223,7 @@ export default class TwtxtClient extends Component {
                   owner={this.state.twtxt.nick}
                   switchUser={this.boundSwitchUser}
                 />
-                <Text
-                  style={{
-                    color: this.state.config.foregroundColor,
-                    fontSize: `${this.state.config.fontSize * 1.25}pt`,
-                    fontWeight: 'bold',
-                    textAlign: 'left',
-                  }}
-                >
-                  Mentions
-                </Text>
-                <View
-                  style={{
-                    alignItems: 'flex-start',
-                    flex: 1,
-                    flexDirection: 'column',
-                    justifyContent: 'flex-start',
-                    width: '100%',
-                  }}
-                >
-                  <Text
-                    style={{
-                      color: this.state.config.foregroundColor,
-                      fontSize: `${this.state.config.fontSize}pt`,
-                      fontWeight: 'bold',
-                      textAlign: 'left',
-                    }}
-                  >
-                    Test
-                  </Text>
-                </View>
+                <PanelMention config={this.state.config}></PanelMention>
               </View>
               <View
                 style={{
