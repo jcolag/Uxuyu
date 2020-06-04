@@ -2,8 +2,7 @@ import React, { Component } from 'react';
 import { App, Text, View, Window } from 'proton-native';
 import Entry from './entry';
 import MessageBlock from './messageblock';
-import PanelFollow from './panelfollow';
-import PanelMention from './panelmention';
+import Sidebar from './sidebar';
 
 const fs = require('fs');
 const getUrls = require('get-urls');
@@ -184,32 +183,7 @@ export default class TwtxtClient extends Component {
 
   render() {
     const showUser = this.state.showOnlyUser;
-    let posts = [];
-    let key = 0;
-
-    Object.keys(this.state.posts)
-      .filter((h) => showUser === null || h === showUser)
-      .forEach((h) => {
-        this.state.posts[h].forEach((p) => {
-          posts.push({
-            date: p.date,
-            handle: h,
-            message: p.message,
-            urls: p.urls,
-          });
-        });
-      });
-    posts = posts
-      .sort((a, b) => b.date - a.date)
-      .slice(0, this.state.twtxt.limit_timeline)
-      .map((p) => (
-        <MessageBlock
-          addUser={this.boundAddUser}
-          config={this.state.config}
-          key={(key += 5)}
-          post={p}
-        />
-      ));
+    let posts = this.renderPostList(showUser, posts);
 
     return (
       <App>
@@ -240,25 +214,12 @@ export default class TwtxtClient extends Component {
                 width: '100%',
               }}
             >
-              <View
-                style={{
-                  alignItems: 'flex-start',
-                  flex: 1,
-                  flexDirection: 'column',
-                  height: '100%',
-                  justifyContent: 'flex-start',
-                  maxWidth: '250px',
-                  width: '250px',
-                }}
-              >
-                <PanelFollow
-                  config={this.state.config}
-                  following={this.state.following}
-                  owner={this.state.twtxt.nick}
-                  switchUser={this.boundSwitchUser}
-                />
-                <PanelMention config={this.state.config}></PanelMention>
-              </View>
+              <Sidebar
+                config={this.state.config}
+                following={this.state.following}
+                nick={this.state.twtxt.nick}
+                boundSwitchUser={this.boundSwitchUser}
+              ></Sidebar>{' '}
               <View
                 style={{
                   alignItems: 'flex-start',
@@ -287,5 +248,34 @@ export default class TwtxtClient extends Component {
         </Window>
       </App>
     );
+  }
+
+  renderPostList(showUser) {
+    let key = 0;
+
+    Object.keys(this.state.posts)
+      .filter((h) => showUser === null || h === showUser)
+      .forEach((h) => {
+        this.state.posts[h].forEach((p) => {
+          posts.push({
+            date: p.date,
+            handle: h,
+            message: p.message,
+            urls: p.urls,
+          });
+        });
+      });
+    const posts = posts
+      .sort((a, b) => b.date - a.date)
+      .slice(0, this.state.twtxt.limit_timeline)
+      .map((p) => (
+        <MessageBlock
+          addUser={this.boundAddUser}
+          config={this.state.config}
+          key={(key += 5)}
+          post={p}
+        />
+      ));
+    return { posts, key };
   }
 }

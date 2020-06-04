@@ -60,7 +60,4 @@ PanelMention.propTypes = {
     fontSize: PropTypes.number,
     foregroundColor: PropTypes.string,
   }),
-  following: PropTypes.object,
-  owner: PropTypes.string,
-  switchUser: PropTypes.func,
 };
