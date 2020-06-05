@@ -1,6 +1,8 @@
 import PropTypes from 'prop-types';
-import { Text, View } from 'proton-native';
+import { Button, Text, View } from 'proton-native';
 import React from 'react';
+
+const moment = require('moment');
 
 export default class PanelMention extends React.Component {
   constructor(props) {
@@ -9,6 +11,24 @@ export default class PanelMention extends React.Component {
   }
 
   render() {
+    let key = 0;
+    const btnStyle = {
+      border: `1px solid ${this.props.config.foregroundColor}`,
+      borderRadius: `${this.props.config.fontSize / 2}px`,
+      color: this.props.config.foregroundColor,
+      fontSize: `${this.props.config.fontSize}pt`,
+      fontWeight: 'bold',
+      textAlign: 'center',
+      width: '98%',
+    };
+    const mentionList = this.props.mentions.map((m) => (
+      <Button
+        key={++key}
+        style={btnStyle}
+        title={`${m.handle}, ${moment(m.date).fromNow()}`}
+      />
+    ));
+
     return (
       <View
         style={{
@@ -40,16 +60,7 @@ export default class PanelMention extends React.Component {
             width: '100%',
           }}
         >
-          <Text
-            style={{
-              color: this.props.config.foregroundColor,
-              fontSize: `${this.props.config.fontSize}pt`,
-              fontWeight: 'bold',
-              textAlign: 'left',
-            }}
-          >
-            Test
-          </Text>
+          {mentionList}
         </View>
       </View>
     );
@@ -60,4 +71,12 @@ PanelMention.propTypes = {
     fontSize: PropTypes.number,
     foregroundColor: PropTypes.string,
   }),
+  mentions: PropTypes.arrayOf(
+    PropTypes.shape({
+      date: PropTypes.date,
+      following: PropTypes.bool,
+      handle: PropTypes.string,
+      message: PropTypes.string,
+    })
+  ),
 };

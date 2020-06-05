@@ -29,7 +29,10 @@ export default class Sidebar extends Component {
           owner={this.props.nick}
           switchUser={this.props.boundSwitchUser}
         />
-        <PanelMention config={this.props.config}></PanelMention>
+        <PanelMention
+          config={this.props.config}
+          mentions={this.props.mentions}
+        />
       </View>
     );
   }
@@ -41,6 +44,14 @@ Sidebar.propTypes = {
     foregroundColor: PropTypes.string,
   }),
   following: PropTypes.object,
+  mentions: PropTypes.arrayOf(
+    PropTypes.shape({
+      date: PropTypes.date,
+      following: PropTypes.bool,
+      handle: PropTypes.string,
+      message: PropTypes.string,
+    })
+  ),
   nick: PropTypes.string,
   owner: PropTypes.string,
   switchUser: PropTypes.func,

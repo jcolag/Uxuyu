@@ -24,6 +24,19 @@ export default class TwtxtClient extends Component {
       foregroundColor: 'white',
       minInterval: 15,
     };
+
+    Object.keys(twtxtconfig.following).forEach((handle) => {
+      const url = twtxtconfig.following[handle];
+
+      twtxtconfig.following[handle] = {
+        following: true,
+        handle: handle,
+        lastSeen: Date.now().toString(),
+        lastPost: Date.now().toString(),
+        url: url,
+      };
+    });
+
     const fworker = new Worker('./followworker.js', {
       workerData: {
         following: twtxtconfig.following,
@@ -43,6 +56,7 @@ export default class TwtxtClient extends Component {
       config: config,
       following: twtxtconfig.following,
       knownPeers: Object.assign(following, twtxtconfig.following),
+      mentions: [],
       posts: {
         nobody: [
           {
@@ -70,13 +84,10 @@ export default class TwtxtClient extends Component {
 
   updateAccounts(accountUpdate) {
     for (let i = 0; i < accountUpdate.length; i++) {
-      const match = this.state.following.filter(
-        (f) => f.handle === accountUpdate[i].handle
+      accountUpdate[i].following = Object.prototype.hasOwnProperty.call(
+        this.state.following,
+        accountUpdate[i].handle
       );
-
-      if (match.length > 0) {
-        accountUpdate[i].following = true;
-      }
     }
 
     this.setState({
@@ -107,9 +118,29 @@ export default class TwtxtClient extends Component {
               .split(' ');
             this.addUser(parts);
             if (parts[0] === this.state.twtxt.nick) {
-              console.log(
-                `Got one from ${userUpdate.handle} at ${userUpdate.messages[i].date}`
+              let mentions = this.state.mentions;
+              const found = mentions.filter(
+                (m) =>
+                  // eslint-disable-next-line implicit-arrow-linebreak
+                  m.handle === userUpdate.handle &&
+                  m.date.toString() === userUpdate.messages[i].date.toString()
               );
+
+              if (found.length === 0) {
+                mentions.push({
+                  date: userUpdate.messages[i].date,
+                  following: Object.prototype.hasOwnProperty.call(
+                    this.state.following,
+                    userUpdate.handle
+                  ),
+                  handle: userUpdate.handle,
+                  message: userUpdate.messages[i].message,
+                });
+                mentions = mentions.sort((a, b) => a.date - b.date);
+                this.setState({
+                  mentions: mentions,
+                });
+              }
             }
           }
         }
@@ -215,11 +246,12 @@ export default class TwtxtClient extends Component {
               }}
             >
               <Sidebar
+                boundSwitchUser={this.boundSwitchUser}
                 config={this.state.config}
                 following={this.state.following}
+                mentions={this.state.mentions}
                 nick={this.state.twtxt.nick}
-                boundSwitchUser={this.boundSwitchUser}
-              ></Sidebar>{' '}
+              ></Sidebar>
               <View
                 style={{
                   alignItems: 'flex-start',
@@ -251,6 +283,7 @@ export default class TwtxtClient extends Component {
   }
 
   renderPostList(showUser) {
+    let posts = [];
     let key = 0;
 
     Object.keys(this.state.posts)
@@ -265,7 +298,7 @@ export default class TwtxtClient extends Component {
           });
         });
       });
-    const posts = posts
+    posts = posts
       .sort((a, b) => b.date - a.date)
       .slice(0, this.state.twtxt.limit_timeline)
       .map((p) => (
@@ -276,6 +309,6 @@ export default class TwtxtClient extends Component {
           post={p}
         />
       ));
-    return { posts, key };
+    return posts;
   }
 }

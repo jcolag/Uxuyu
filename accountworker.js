@@ -47,26 +47,32 @@ try {
         const peer = checkStmt.get(h);
 
         if (peer === null || typeof peer === 'undefined') {
-          insStmt.run(h, userDict[h], Date.now().valueOf(), 0);
+          insStmt.run(h, userDict[h].url, Date.now().valueOf(), 0);
         }
       } catch (he) {
         console.log(he);
       }
     });
   });
+
+  updateAccounts(parentPort);
 } catch (e) {
   console.log(e);
 }
 
 function updateAccounts(parentPort) {
+  const peers = {};
+
   try {
-    let peers = selectAllStmt.all().map((r) => ({
-      handle: r.handle,
-      url: r.url,
-      lastSeen: r.last_seen,
-      lastPost: r.last_post,
-      following: false,
-    }));
+    selectAllStmt.all().forEach((r) => {
+      peers[r.handle] = {
+        following: false,
+        handle: r.handle,
+        lastPost: r.last_post,
+        lastSeen: r.last_seen,
+        url: r.url,
+      };
+    });
     parentPort.postMessage(peers);
   } catch (e) {}
 }

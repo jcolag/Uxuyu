@@ -4,20 +4,20 @@ const { parentPort, workerData } = require('worker_threads');
 
 const ms = workerData.minInterval * 60 * 1000;
 let knownPeers = workerData.following;
-let handles = Object.keys(knownPeers);
 // eslint-disable-next-line no-unused-vars
-const interval = setInterval(updatePosts, ms, parentPort, handles);
+const interval = setInterval(updatePosts, ms, parentPort);
 let iterations = 1;
 
-updatePosts(parentPort, handles);
+updatePosts(parentPort);
 parentPort.on('message', updateFollowing);
 
 function updateFollowing(newFollowing) {
   knownPeers = newFollowing;
-  handles = Object.keys(knownPeers);
 }
 
-function updatePosts(parentPort, handles) {
+function updatePosts(parentPort) {
+  const handles = Object.keys(knownPeers);
+
   try {
     parentPort.postMessage(
       postsFromLog(
@@ -26,7 +26,10 @@ function updatePosts(parentPort, handles) {
       )
     );
     handles.forEach((h) => {
-      if (!knownPeers[h].following && iterations % 5 !== 0) {
+      if (
+        !Object.prototype.hasOwnProperty.call(workerData.following, h) &&
+        iterations % 5 !== 0
+      ) {
         return;
       }
 
@@ -34,7 +37,7 @@ function updatePosts(parentPort, handles) {
         headers: {
           'User-Agent': 'Uxuyu Prototype Testing',
         },
-        url: workerData.following[h],
+        url: knownPeers[h].url,
       };
 
       request(options, (err, res, body) => {
