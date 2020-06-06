@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { App, Text, View, Window } from 'proton-native';
 import Entry from './entry';
-import MessageBlock from './messageblock';
+import PostList from './postlist';
 import Sidebar from './sidebar';
 
 const fs = require('fs');
@@ -213,9 +213,6 @@ export default class TwtxtClient extends Component {
   }
 
   render() {
-    const showUser = this.state.showOnlyUser;
-    let posts = this.renderPostList(showUser, posts);
-
     return (
       <App>
         <Window
@@ -272,43 +269,22 @@ export default class TwtxtClient extends Component {
                 >
                   Posts
                 </Text>
-                {posts}
+                <PostList
+                  config={this.state.config}
+                  posts={this.state.posts}
+                  showUser={this.state.showOnlyUser}
+                  twtxt={this.state.twtxt}
+                />
               </View>
             </View>
-            <Entry config={this.state.config} twtxt={this.state.twtxt} />
+            <Entry
+              config={this.state.config}
+              page={1}
+              twtxt={this.state.twtxt}
+            />
           </View>
         </Window>
       </App>
     );
-  }
-
-  renderPostList(showUser) {
-    let posts = [];
-    let key = 0;
-
-    Object.keys(this.state.posts)
-      .filter((h) => showUser === null || h === showUser)
-      .forEach((h) => {
-        this.state.posts[h].forEach((p) => {
-          posts.push({
-            date: p.date,
-            handle: h,
-            message: p.message,
-            urls: p.urls,
-          });
-        });
-      });
-    posts = posts
-      .sort((a, b) => b.date - a.date)
-      .slice(0, this.state.twtxt.limit_timeline)
-      .map((p) => (
-        <MessageBlock
-          addUser={this.boundAddUser}
-          config={this.state.config}
-          key={(key += 5)}
-          post={p}
-        />
-      ));
-    return posts;
   }
 }

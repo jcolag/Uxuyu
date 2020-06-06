@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { Button, TextInput, View } from 'proton-native';
+import { Button, Text, TextInput, View } from 'proton-native';
 
 const fs = require('fs');
 const moment = require('moment');
@@ -59,6 +59,18 @@ export default class Entry extends Component {
   }
 
   render() {
+    const btnStyle = {
+      backgroundColor: this.props.config.backgroundColor,
+      border: '1px solid ' + this.props.config.foregroundColor,
+      borderRadius: `${this.props.config.fontSize / 2}px`,
+      fontWeight: 'bold',
+      color: this.props.config.foregroundColor,
+      fontSize: `${this.props.config.fontSize}pt`,
+      height: '40px',
+      marginLeft: '0.5%',
+      width: '4%',
+    };
+
     return (
       <View
         style={{
@@ -83,25 +95,25 @@ export default class Entry extends Component {
               : this.props.config.foregroundColor,
             fontSize: `${this.props.config.fontSize}pt`,
             height: '40px',
-            width: '89%',
+            width: '81%',
           }}
           value={this.state.defaultPostText}
         />
-        <Button
-          onPress={this.boundPostTweet}
+        <Button onPress={this.boundPostTweet} style={btnStyle} title='Post' />
+        <Button style={btnStyle} title='👈' />
+        <Text
           style={{
             backgroundColor: this.props.config.backgroundColor,
-            border: '1px solid ' + this.props.config.foregroundColor,
-            borderRadius: `${this.props.config.fontSize / 2}px`,
-            fontWeight: 'bold',
             color: this.props.config.foregroundColor,
+            fontWeight: 'bold',
             fontSize: `${this.props.config.fontSize}pt`,
-            height: '40px',
-            marginLeft: '0.5%',
-            width: '10%',
+            textAlign: 'center',
+            width: '4%',
           }}
-          title='Post'
-        />
+        >
+          p. {this.props.page.toString()}
+        </Text>
+        <Button style={btnStyle} title='👉' />
       </View>
     );
   }
@@ -112,6 +124,7 @@ Entry.propTypes = {
     fontSize: PropTypes.number,
     foregroundColor: PropTypes.string,
   }),
+  page: PropTypes.number,
   twtxt: PropTypes.shape({
     // eslint-disable-next-line camelcase
     character_warning: PropTypes.string,
