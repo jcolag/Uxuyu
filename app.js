@@ -57,6 +57,7 @@ export default class TwtxtClient extends Component {
       following: twtxtconfig.following,
       knownPeers: Object.assign(following, twtxtconfig.following),
       mentions: [],
+      pageNumber: 1,
       posts: {
         nobody: [
           {
@@ -74,6 +75,9 @@ export default class TwtxtClient extends Component {
     this.postText = '';
     this.boundAddUser = this.addUser.bind(this);
     this.boundSwitchUser = this.switchUser.bind(this);
+    this.boundJumpToPost = this.jumpToPost.bind(this);
+    this.increasePage = this.updatePage.bind(this, 1);
+    this.decreasePage = this.updatePage.bind(this, -1);
     fworker.on('message', this.takeUpdate.bind(this));
     fworker.on('error', this.reportUpdateError.bind(this));
     fworker.on('exit', this.reportExit.bind(this));
@@ -208,7 +212,63 @@ export default class TwtxtClient extends Component {
 
   switchUser(user) {
     this.setState({
+      pageNumber: 1,
       showOnlyUser: user,
+    });
+  }
+
+  updatePage(increment) {
+    const newPage = this.state.pageNumber + increment;
+
+    if (newPage < 1) {
+      return;
+    }
+
+    if (this.state.showOnlyUser !== null) {
+      const postCount = this.state.posts[this.state.showOnlyUser].length;
+
+      if (
+        newPage > Math.ceil(postCount / Number(this.state.twtxt.limit_timeline))
+      ) {
+        return;
+      }
+    }
+
+    this.setState({
+      pageNumber: newPage,
+    });
+  }
+
+  jumpToPost(post) {
+    const handle = post.handle;
+    const date = new Date(post.date);
+    let foundIndex = 0;
+
+    this.setState({
+      pageNumber: 0,
+      showOnlyUser: null,
+    });
+
+    for (
+      foundIndex = 0;
+      foundIndex < this.state.posts[handle].length;
+      foundIndex++
+    ) {
+      if (
+        this.state.posts[handle][foundIndex].date.valueOf() === date.valueOf()
+      ) {
+        break;
+      }
+    }
+
+    foundIndex = this.state.posts[handle].length - foundIndex - 1;
+    const page = Math.floor(
+      foundIndex / Number(this.state.twtxt.limit_timeline)
+    );
+
+    this.setState({
+      pageNumber: page + 1,
+      showOnlyUser: handle,
     });
   }
 
@@ -246,6 +306,7 @@ export default class TwtxtClient extends Component {
                 boundSwitchUser={this.boundSwitchUser}
                 config={this.state.config}
                 following={this.state.following}
+                jumpToPost={this.boundJumpToPost}
                 mentions={this.state.mentions}
                 nick={this.state.twtxt.nick}
               ></Sidebar>
@@ -271,6 +332,7 @@ export default class TwtxtClient extends Component {
                 </Text>
                 <PostList
                   config={this.state.config}
+                  pageNumber={this.state.pageNumber}
                   posts={this.state.posts}
                   showUser={this.state.showOnlyUser}
                   twtxt={this.state.twtxt}
@@ -279,7 +341,9 @@ export default class TwtxtClient extends Component {
             </View>
             <Entry
               config={this.state.config}
-              page={1}
+              decreasePage={this.decreasePage}
+              increasePage={this.increasePage}
+              pageNumber={this.state.pageNumber}
               twtxt={this.state.twtxt}
             />
           </View>

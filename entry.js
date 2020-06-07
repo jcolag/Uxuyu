@@ -100,7 +100,7 @@ export default class Entry extends Component {
           value={this.state.defaultPostText}
         />
         <Button onPress={this.boundPostTweet} style={btnStyle} title='Post' />
-        <Button style={btnStyle} title='👈' />
+        <Button onPress={this.props.decreasePage} style={btnStyle} title='👈' />
         <Text
           style={{
             backgroundColor: this.props.config.backgroundColor,
@@ -111,9 +111,9 @@ export default class Entry extends Component {
             width: '4%',
           }}
         >
-          p. {this.props.page.toString()}
+          p. {this.props.pageNumber.toString()}
         </Text>
-        <Button style={btnStyle} title='👉' />
+        <Button onPress={this.props.increasePage} style={btnStyle} title='👉' />
       </View>
     );
   }
@@ -124,7 +124,9 @@ Entry.propTypes = {
     fontSize: PropTypes.number,
     foregroundColor: PropTypes.string,
   }),
-  page: PropTypes.number,
+  decreasePage: PropTypes.func,
+  increasePage: PropTypes.func,
+  pageNumber: PropTypes.number,
   twtxt: PropTypes.shape({
     // eslint-disable-next-line camelcase
     character_warning: PropTypes.string,

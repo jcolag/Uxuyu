@@ -24,6 +24,7 @@ export default class PanelMention extends React.Component {
     const mentionList = this.props.mentions.map((m) => (
       <Button
         key={++key}
+        onPress={() => this.props.jumpToPost(m)}
         style={btnStyle}
         title={`${m.handle}, ${moment(m.date).fromNow()}`}
       />
@@ -71,6 +72,7 @@ PanelMention.propTypes = {
     fontSize: PropTypes.number,
     foregroundColor: PropTypes.string,
   }),
+  jumpToPost: PropTypes.func,
   mentions: PropTypes.arrayOf(
     PropTypes.shape({
       date: PropTypes.date,

@@ -10,8 +10,10 @@ export default class PostList extends Component {
   }
 
   render() {
+    const limit = Number(this.props.twtxt.limit_timeline);
     let posts = [];
     let key = 0;
+    let offset = (this.props.pageNumber - 1) * limit;
 
     Object.keys(this.props.posts)
       .filter((h) => this.props.showUser === null || h === this.props.showUser)
@@ -27,7 +29,7 @@ export default class PostList extends Component {
       });
     posts = posts
       .sort((a, b) => b.date - a.date)
-      .slice(0, this.props.twtxt.limit_timeline)
+      .slice(offset, offset + limit)
       .map((p) => (
         <MessageBlock
           addUser={this.boundAddUser}
@@ -41,6 +43,7 @@ export default class PostList extends Component {
 }
 PostList.propTypes = {
   config: PropTypes.any,
+  pageNumber: PropTypes.number,
   posts: PropTypes.object,
   showUser: PropTypes.string,
   twtxt: PropTypes.shape({

@@ -31,6 +31,7 @@ export default class Sidebar extends Component {
         />
         <PanelMention
           config={this.props.config}
+          jumpToPost={this.props.jumpToPost}
           mentions={this.props.mentions}
         />
       </View>
@@ -44,6 +45,7 @@ Sidebar.propTypes = {
     foregroundColor: PropTypes.string,
   }),
   following: PropTypes.object,
+  jumpToPost: PropTypes.func,
   mentions: PropTypes.arrayOf(
     PropTypes.shape({
       date: PropTypes.date,
