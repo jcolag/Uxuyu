@@ -34,6 +34,7 @@ export default class PostList extends Component {
         <MessageBlock
           addUser={this.boundAddUser}
           config={this.props.config}
+          highlight={this.props.highlightDate === new Date(p.date).valueOf()}
           key={(key += 5)}
           post={p}
         />
@@ -43,6 +44,7 @@ export default class PostList extends Component {
 }
 PostList.propTypes = {
   config: PropTypes.any,
+  highlightDate: PropTypes.number,
   pageNumber: PropTypes.number,
   posts: PropTypes.object,
   showUser: PropTypes.string,

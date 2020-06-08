@@ -18,6 +18,12 @@ export default class MessageBlock extends Component {
   render() {
     const post = this.props.post;
     const links = [];
+    const bg = this.props.highlight
+      ? this.props.config.foregroundColor
+      : this.props.config.backgroundColor;
+    const fg = this.props.highlight
+      ? this.props.config.backgroundColor
+      : this.props.config.foregroundColor;
     let key = 0;
 
     post.urls.forEach((u) => {
@@ -26,9 +32,10 @@ export default class MessageBlock extends Component {
           key={`link-${key++}`}
           onPress={this.openUrl.bind(u)}
           style={{
-            border: `1px solid ${this.props.config.foregroundColor}`,
+            backgroundColor: bg,
+            border: `1px solid ${fg}`,
             borderRadius: `${this.props.config.fontSize / 2}px`,
-            color: this.props.config.foregroundColor,
+            color: fg,
             fontSize: `${this.props.config.fontSize}pt`,
             fontWeight: 'normal',
             marginLeft: '10%',
@@ -44,13 +51,15 @@ export default class MessageBlock extends Component {
       <View
         key={++key}
         style={{
+          backgroundColor: bg,
           paddingTop: `${this.props.config.fontSize / 2}pt`,
         }}
       >
         <Text
           key={++key}
           style={{
-            color: this.props.config.foregroundColor,
+            backgroundColor: bg,
+            color: fg,
             fontSize: `${this.props.config.fontSize * 0.8}pt`,
             fontWeight: 'normal',
             textAlign: 'right',
@@ -63,9 +72,10 @@ export default class MessageBlock extends Component {
           key={++key}
           multiline
           style={{
-            color: this.props.config.foregroundColor,
+            backgroundColor: bg,
+            color: fg,
             fontSize: `${this.props.config.fontSize}pt`,
-            fontWeight: 'bold',
+            fontWeight: 'normal',
             textAlign: 'left',
             width: '99%',
           }}
@@ -80,9 +90,11 @@ export default class MessageBlock extends Component {
 MessageBlock.propTypes = {
   addUser: PropTypes.func,
   config: PropTypes.shape({
+    backgroundColor: PropTypes.string,
     fontSize: PropTypes.number,
     foregroundColor: PropTypes.string,
   }),
+  highlight: PropTypes.bool,
   post: PropTypes.shape({
     date: PropTypes.date,
     handle: PropTypes.string,

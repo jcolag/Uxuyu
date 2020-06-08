@@ -55,6 +55,7 @@ export default class TwtxtClient extends Component {
     this.state = {
       config: config,
       following: twtxtconfig.following,
+      highlightDate: null,
       knownPeers: Object.assign(following, twtxtconfig.following),
       mentions: [],
       pageNumber: 1,
@@ -212,6 +213,7 @@ export default class TwtxtClient extends Component {
 
   switchUser(user) {
     this.setState({
+      highlightDate: Number.MAX_VALUE,
       pageNumber: 1,
       showOnlyUser: user,
     });
@@ -235,6 +237,7 @@ export default class TwtxtClient extends Component {
     }
 
     this.setState({
+      highlightDate: Number.MAX_VALUE,
       pageNumber: newPage,
     });
   }
@@ -245,6 +248,7 @@ export default class TwtxtClient extends Component {
     let foundIndex = 0;
 
     this.setState({
+      highlightDate: Number.MAX_VALUE,
       pageNumber: 0,
       showOnlyUser: null,
     });
@@ -267,6 +271,7 @@ export default class TwtxtClient extends Component {
     );
 
     this.setState({
+      highlightDate: date.valueOf(),
       pageNumber: page + 1,
       showOnlyUser: handle,
     });
@@ -332,6 +337,7 @@ export default class TwtxtClient extends Component {
                 </Text>
                 <PostList
                   config={this.state.config}
+                  highlightDate={this.state.highlightDate}
                   pageNumber={this.state.pageNumber}
                   posts={this.state.posts}
                   showUser={this.state.showOnlyUser}
