@@ -19,7 +19,6 @@ export default class TwtxtClient extends Component {
   constructor(props) {
     let config = {
       backgroundColor: 'black',
-      exportStyle: '',
       fontSize: 18,
       foregroundColor: 'white',
       minInterval: 15,
@@ -52,6 +51,13 @@ export default class TwtxtClient extends Component {
     let following = new Object();
 
     super(props);
+    try {
+      const configFile = path.join(homedir, '.config', 'Uxuyu.json');
+      const configJson = fs.readFileSync(configFile, 'utf-8');
+      const userConfig = JSON.parse(configJson);
+
+      Object.assign(config, userConfig);
+    } catch {}
     this.state = {
       config: config,
       following: twtxtconfig.following,
