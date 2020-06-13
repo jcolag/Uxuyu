@@ -50,7 +50,7 @@ export default class Entry extends Component {
     ) {
       try {
         opn(this.props.twtxt.post_tweet_hook, {
-          app: 'bash',
+          app: this.props.config.openApp,
         });
       } catch (e) {
         console.error(e);
@@ -123,6 +123,7 @@ Entry.propTypes = {
     backgroundColor: PropTypes.string,
     fontSize: PropTypes.number,
     foregroundColor: PropTypes.string,
+    openApp: PropTypes.string,
   }),
   decreasePage: PropTypes.func,
   increasePage: PropTypes.func,

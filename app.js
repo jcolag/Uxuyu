@@ -22,6 +22,7 @@ export default class TwtxtClient extends Component {
       fontSize: 18,
       foregroundColor: 'white',
       minInterval: 15,
+      openApp: null,
     };
 
     Object.keys(twtxtconfig.following).forEach((handle) => {
