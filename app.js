@@ -19,6 +19,7 @@ export default class TwtxtClient extends Component {
   constructor(props) {
     let config = {
       backgroundColor: 'black',
+      fontFamily: null,
       fontSize: 18,
       foregroundColor: 'white',
       minInterval: 15,
@@ -335,6 +336,7 @@ export default class TwtxtClient extends Component {
                 <Text
                   style={{
                     color: this.state.config.foregroundColor,
+                    fontFamily: this.state.config.fontFamily,
                     fontSize: `${this.state.config.fontSize * 1.25}pt`,
                     fontWeight: 'bold',
                     textAlign: 'left',

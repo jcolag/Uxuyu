@@ -36,6 +36,7 @@ export default class MessageBlock extends Component {
             border: `1px solid ${fg}`,
             borderRadius: `${this.props.config.fontSize / 2}px`,
             color: fg,
+            fontFamily: this.props.config.fontFamily,
             fontSize: `${this.props.config.fontSize}pt`,
             fontWeight: 'normal',
             marginLeft: '10%',
@@ -60,6 +61,7 @@ export default class MessageBlock extends Component {
           style={{
             backgroundColor: bg,
             color: fg,
+            fontFamily: this.props.config.fontFamily,
             fontSize: `${this.props.config.fontSize * 0.8}pt`,
             fontWeight: 'normal',
             textAlign: 'right',
@@ -74,6 +76,7 @@ export default class MessageBlock extends Component {
           style={{
             backgroundColor: bg,
             color: fg,
+            fontFamily: this.props.config.fontFamily,
             fontSize: `${this.props.config.fontSize}pt`,
             fontWeight: 'normal',
             textAlign: 'left',
@@ -91,6 +94,7 @@ MessageBlock.propTypes = {
   addUser: PropTypes.func,
   config: PropTypes.shape({
     backgroundColor: PropTypes.string,
+    fontFamily: PropTypes.string,
     fontSize: PropTypes.number,
     foregroundColor: PropTypes.string,
   }),

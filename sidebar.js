@@ -41,7 +41,6 @@ export default class Sidebar extends Component {
 Sidebar.propTypes = {
   boundSwitchUser: PropTypes.func,
   config: PropTypes.shape({
-    fontSize: PropTypes.number,
     foregroundColor: PropTypes.string,
   }),
   following: PropTypes.object,

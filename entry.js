@@ -65,6 +65,7 @@ export default class Entry extends Component {
       borderRadius: `${this.props.config.fontSize / 2}px`,
       fontWeight: 'bold',
       color: this.props.config.foregroundColor,
+      fontFamily: this.props.config.fontFamily,
       fontSize: `${this.props.config.fontSize}pt`,
       height: '40px',
       marginLeft: '0.5%',
@@ -93,6 +94,7 @@ export default class Entry extends Component {
             color: this.state.longMsg
               ? 'lightyellow'
               : this.props.config.foregroundColor,
+            fontFamily: this.props.config.fontFamily,
             fontSize: `${this.props.config.fontSize}pt`,
             height: '40px',
             width: '81%',
@@ -106,6 +108,7 @@ export default class Entry extends Component {
             backgroundColor: this.props.config.backgroundColor,
             color: this.props.config.foregroundColor,
             fontWeight: 'bold',
+            fontFamily: this.props.config.fontFamily,
             fontSize: `${this.props.config.fontSize}pt`,
             textAlign: 'center',
             width: '4%',
@@ -121,6 +124,7 @@ export default class Entry extends Component {
 Entry.propTypes = {
   config: PropTypes.shape({
     backgroundColor: PropTypes.string,
+    fontFamily: PropTypes.string,
     fontSize: PropTypes.number,
     foregroundColor: PropTypes.string,
     openApp: PropTypes.string,

@@ -19,6 +19,7 @@ export default class PanelFollow extends Component {
       border: `1px solid ${this.props.config.foregroundColor}`,
       borderRadius: `${this.props.config.fontSize / 2}px`,
       color: this.props.config.foregroundColor,
+      fontFamily: this.props.config.fontFamily,
       fontSize: `${this.props.config.fontSize}pt`,
       fontWeight: 'bold',
       textAlign: 'center',
@@ -51,6 +52,7 @@ export default class PanelFollow extends Component {
         <Text
           style={{
             color: this.props.config.foregroundColor,
+            fontFamily: this.props.config.fontFamily,
             fontSize: `${this.props.config.fontSize * 1.25}pt`,
             fontWeight: 'bold',
             textAlign: 'left',
@@ -87,6 +89,7 @@ export default class PanelFollow extends Component {
 }
 PanelFollow.propTypes = {
   config: PropTypes.shape({
+    fontFamily: PropTypes.string,
     fontSize: PropTypes.number,
     foregroundColor: PropTypes.string,
   }),
