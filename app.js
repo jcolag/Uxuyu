@@ -210,7 +210,9 @@ export default class TwtxtClient extends Component {
     if (
       !Object.prototype.hasOwnProperty.call(this.state.knownPeers, user.name)
     ) {
-      knownPeers[user.name] = user.address;
+      knownPeers[user.name] = {
+        url: user.address,
+      };
       this.setState({
         knownPeers: knownPeers,
       });

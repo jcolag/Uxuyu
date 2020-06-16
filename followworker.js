@@ -43,6 +43,7 @@ function updatePosts(parentPort) {
       request(options, (err, res, body) => {
         try {
           if (err) {
+            console.log(`Error connecting with @${h} (${options.url})`);
             console.log(err);
             return;
           }
