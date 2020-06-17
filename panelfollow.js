@@ -82,12 +82,19 @@ export default class PanelFollow extends Component {
             style={btnStyle}
             title=' 👉 All Users 👈 '
           />
+          <Button
+            key={++key}
+            onPress={() => this.props.activateFirehose()}
+            style={btnStyle}
+            title='🧯 Firehose 🧯'
+          />
         </View>
       </View>
     );
   }
 }
 PanelFollow.propTypes = {
+  activateFirehose: PropTypes.func,
   config: PropTypes.shape({
     fontFamily: PropTypes.string,
     fontSize: PropTypes.number,

@@ -24,6 +24,7 @@ export default class Sidebar extends Component {
         }}
       >
         <PanelFollow
+          activateFirehose={this.props.boundSwitchToFirehose}
           config={this.props.config}
           following={this.props.following}
           owner={this.props.nick}
@@ -39,6 +40,7 @@ export default class Sidebar extends Component {
   }
 }
 Sidebar.propTypes = {
+  boundSwitchToFirehose: PropTypes.func,
   boundSwitchUser: PropTypes.func,
   config: PropTypes.shape({
     foregroundColor: PropTypes.string,

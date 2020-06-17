@@ -48,6 +48,7 @@ export default class TwtxtClient extends Component {
     const pworker = new Worker('./accountworker.js', {
       workerData: {
         minInterval: Math.max(config.minInterval, 5),
+        following: twtxtconfig.following,
       },
     });
     let following = new Object();
@@ -76,14 +77,15 @@ export default class TwtxtClient extends Component {
           },
         ],
       },
+      showAllUsers: false,
       showOnlyUser: null,
       threadAccount: pworker,
       threadFollow: fworker,
       twtxt: twtxtconfig.twtxt,
     };
     this.postText = '';
-    this.boundAddUser = this.addUser.bind(this);
     this.boundSwitchUser = this.switchUser.bind(this);
+    this.boundSwitchToFirehose = this.switchToFirehose.bind(this);
     this.boundJumpToPost = this.jumpToPost.bind(this);
     this.increasePage = this.updatePage.bind(this, 1);
     this.decreasePage = this.updatePage.bind(this, -1);
@@ -225,7 +227,17 @@ export default class TwtxtClient extends Component {
     this.setState({
       highlightDate: Number.MAX_VALUE,
       pageNumber: 1,
+      showAllUsers: false,
       showOnlyUser: user,
+    });
+  }
+
+  switchToFirehose() {
+    this.setState({
+      highlightDate: Number.MAX_VALUE,
+      pageNumber: 1,
+      showAllUsers: true,
+      showOnlyUser: null,
     });
   }
 
@@ -318,6 +330,7 @@ export default class TwtxtClient extends Component {
               }}
             >
               <Sidebar
+                boundSwitchToFirehose={this.boundSwitchToFirehose}
                 boundSwitchUser={this.boundSwitchUser}
                 config={this.state.config}
                 following={this.state.following}
@@ -351,8 +364,10 @@ export default class TwtxtClient extends Component {
                   highlightDate={this.state.highlightDate}
                   pageNumber={this.state.pageNumber}
                   posts={this.state.posts}
+                  showExtended={this.state.showAllUsers}
                   showUser={this.state.showOnlyUser}
                   twtxt={this.state.twtxt}
+                  users={this.state.knownPeers}
                 />
               </View>
             </View>

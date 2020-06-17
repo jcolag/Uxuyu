@@ -1,6 +1,7 @@
 const { parentPort, workerData } = require('worker_threads');
 const sqlite3 = require('better-sqlite3');
 
+const following = workerData.following;
 const ms = (workerData.minInterval * 60 * 1000) / 3;
 // eslint-disable-next-line no-unused-vars
 const interval = setInterval(updateAccounts, ms, parentPort);
@@ -66,7 +67,7 @@ function updateAccounts(parentPort) {
   try {
     selectAllStmt.all().forEach((r) => {
       peers[r.handle] = {
-        following: false,
+        following: Object.prototype.hasOwnProperty.call(following, r.handle),
         handle: r.handle,
         lastPost: r.last_post,
         lastSeen: r.last_seen,

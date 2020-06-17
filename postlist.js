@@ -16,6 +16,14 @@ export default class PostList extends Component {
     let offset = (this.props.pageNumber - 1) * limit;
 
     Object.keys(this.props.posts)
+      .filter(
+        (h) =>
+          // eslint-disable-next-line implicit-arrow-linebreak
+          this.props.showExtended ||
+          h === 'nobody' ||
+          h === this.props.twtxt.nick ||
+          this.props.users[h].following
+      )
       .filter((h) => this.props.showUser === null || h === this.props.showUser)
       .forEach((h) => {
         this.props.posts[h].forEach((p) => {
@@ -47,9 +55,12 @@ PostList.propTypes = {
   highlightDate: PropTypes.number,
   pageNumber: PropTypes.number,
   posts: PropTypes.object,
+  showExtended: PropTypes.bool,
   showUser: PropTypes.string,
   twtxt: PropTypes.shape({
     // eslint-disable-next-line camelcase
     limit_timeline: PropTypes.string,
+    nick: PropTypes.string,
   }),
+  users: PropTypes.object,
 };
