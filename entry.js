@@ -69,7 +69,7 @@ export default class Entry extends Component {
       fontSize: `${this.props.config.fontSize}pt`,
       height: '40px',
       marginLeft: '0.5%',
-      width: '4%',
+      width: '2.5%',
     };
 
     return (
@@ -97,11 +97,16 @@ export default class Entry extends Component {
             fontFamily: this.props.config.fontFamily,
             fontSize: `${this.props.config.fontSize}pt`,
             height: '40px',
-            width: '81%',
+            width: '83%',
           }}
           value={this.state.defaultPostText}
         />
-        <Button onPress={this.boundPostTweet} style={btnStyle} title='Post' />
+        <Button onPress={this.boundPostTweet} style={btnStyle} title='✉️' />
+        <Button
+          onPress={() => this.props.query(this.postText)}
+          style={btnStyle}
+          title='🔍'
+        />
         <Button onPress={this.props.decreasePage} style={btnStyle} title='👈' />
         <Text
           style={{
@@ -111,7 +116,7 @@ export default class Entry extends Component {
             fontFamily: this.props.config.fontFamily,
             fontSize: `${this.props.config.fontSize}pt`,
             textAlign: 'center',
-            width: '4%',
+            width: '3%',
           }}
         >
           p. {this.props.pageNumber.toString()}
@@ -132,6 +137,7 @@ Entry.propTypes = {
   decreasePage: PropTypes.func,
   increasePage: PropTypes.func,
   pageNumber: PropTypes.number,
+  query: PropTypes.func,
   twtxt: PropTypes.shape({
     // eslint-disable-next-line camelcase
     character_warning: PropTypes.string,

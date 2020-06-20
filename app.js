@@ -77,6 +77,7 @@ export default class TwtxtClient extends Component {
           },
         ],
       },
+      query: null,
       showAllUsers: false,
       showOnlyUser: null,
       threadAccount: pworker,
@@ -86,6 +87,7 @@ export default class TwtxtClient extends Component {
     this.postText = '';
     this.boundSwitchUser = this.switchUser.bind(this);
     this.boundSwitchToFirehose = this.switchToFirehose.bind(this);
+    this.boundSwitchQuery = this.switchQuery.bind(this);
     this.boundJumpToPost = this.jumpToPost.bind(this);
     this.increasePage = this.updatePage.bind(this, 1);
     this.decreasePage = this.updatePage.bind(this, -1);
@@ -227,6 +229,7 @@ export default class TwtxtClient extends Component {
     this.setState({
       highlightDate: Number.MAX_VALUE,
       pageNumber: 1,
+      query: null,
       showAllUsers: false,
       showOnlyUser: user,
     });
@@ -236,7 +239,16 @@ export default class TwtxtClient extends Component {
     this.setState({
       highlightDate: Number.MAX_VALUE,
       pageNumber: 1,
+      query: null,
       showAllUsers: true,
+      showOnlyUser: null,
+    });
+  }
+
+  switchQuery(text) {
+    this.setState({
+      pageNumber: 1,
+      query: text.trim().toLowerCase(),
       showOnlyUser: null,
     });
   }
@@ -364,6 +376,7 @@ export default class TwtxtClient extends Component {
                   highlightDate={this.state.highlightDate}
                   pageNumber={this.state.pageNumber}
                   posts={this.state.posts}
+                  query={this.state.query}
                   showExtended={this.state.showAllUsers}
                   showUser={this.state.showOnlyUser}
                   twtxt={this.state.twtxt}
@@ -376,6 +389,7 @@ export default class TwtxtClient extends Component {
               decreasePage={this.decreasePage}
               increasePage={this.increasePage}
               pageNumber={this.state.pageNumber}
+              query={this.boundSwitchQuery}
               twtxt={this.state.twtxt}
             />
           </View>

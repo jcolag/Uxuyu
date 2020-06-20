@@ -35,7 +35,14 @@ export default class PostList extends Component {
           });
         });
       });
+
     posts = posts
+      .filter(
+        (p) =>
+          // eslint-disable-next-line implicit-arrow-linebreak
+          this.props.query === null ||
+          p.message.toLowerCase().indexOf(this.props.query) >= 0
+      )
       .sort((a, b) => b.date - a.date)
       .slice(offset, offset + limit)
       .map((p) => (
@@ -54,6 +61,7 @@ PostList.propTypes = {
   config: PropTypes.any,
   highlightDate: PropTypes.number,
   pageNumber: PropTypes.number,
+  query: PropTypes.string,
   posts: PropTypes.object,
   showExtended: PropTypes.bool,
   showUser: PropTypes.string,
