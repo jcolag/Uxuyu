@@ -13,7 +13,7 @@ export default class PostList extends Component {
     const limit = Number(this.props.twtxt.limit_timeline);
     let posts = [];
     let key = 0;
-    let offset = (this.props.pageNumber - 1) * limit;
+    const offset = (this.props.pageNumber - 1) * limit;
 
     Object.keys(this.props.posts)
       .filter(

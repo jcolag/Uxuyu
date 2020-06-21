@@ -17,13 +17,14 @@ const twtxtconfig = ini.parse(
 
 export default class TwtxtClient extends Component {
   constructor(props) {
-    let config = {
+    const config = {
       backgroundColor: 'black',
       fontFamily: null,
       fontSize: 18,
       foregroundColor: 'white',
       minInterval: 15,
       openApp: null,
+      textWidth: 100,
     };
 
     Object.keys(twtxtconfig.following).forEach((handle) => {
@@ -51,7 +52,7 @@ export default class TwtxtClient extends Component {
         following: twtxtconfig.following,
       },
     });
-    let following = new Object();
+    const following = {};
 
     super(props);
     try {
@@ -124,9 +125,9 @@ export default class TwtxtClient extends Component {
       // be added to the list of known peer accounts.
       urls.forEach((u) => {
         if (u.indexOf('&gt;') > 0) {
-          let escaped = u.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); //]/
-          let tag = new RegExp(`@&lt;\\S* ${escaped}`);
-          let found = message.match(tag);
+          const escaped = u.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // ]/
+          const tag = new RegExp(`@&lt;\\S* ${escaped}`);
+          const found = message.match(tag);
 
           if (found !== null) {
             const parts = found[0]
@@ -349,7 +350,7 @@ export default class TwtxtClient extends Component {
                 jumpToPost={this.boundJumpToPost}
                 mentions={this.state.mentions}
                 nick={this.state.twtxt.nick}
-              ></Sidebar>
+              />
               <View
                 style={{
                   alignItems: 'flex-start',

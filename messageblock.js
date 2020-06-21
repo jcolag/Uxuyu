@@ -15,6 +15,51 @@ export default class MessageBlock extends Component {
     opn(this);
   }
 
+  charWidth(c) {
+    if ('`1!iIl;:\'",.'.indexOf(c) >= 0) {
+      return 0.25;
+    } else if ('1-=+*^()[]{}tfj '.indexOf(c) >= 0) {
+      return 0.5;
+    } else if ('wm'.indexOf(c) >= 0) {
+      return 1.5;
+    } else if ('WM'.indexOf(c) >= 0) {
+      return 2;
+    }
+
+    return 1;
+  }
+
+  wrapString(text) {
+    let result = '';
+    let currentWidth = 0;
+
+    text.split('').forEach((c) => {
+      const w = this.charWidth(c);
+
+      if (currentWidth + w >= this.props.config.textWidth) {
+        let orphan = '';
+        let pc = result.slice(-1);
+
+        currentWidth = 0;
+        while (!/\s/.test(pc)) {
+          currentWidth += this.charWidth(pc);
+          result = result.slice(0, -1);
+          orphan += pc;
+          pc = result.slice(-1);
+        }
+
+        result += '&nbsp;&nbsp;<br>';
+        // eslint-disable-next-line newline-per-chained-call
+        result += orphan.split('').reverse().join('');
+        orphan = '';
+      }
+
+      result += c;
+      currentWidth += w;
+    });
+    return result;
+  }
+
   render() {
     const post = this.props.post;
     const links = [];
@@ -83,7 +128,9 @@ export default class MessageBlock extends Component {
             width: '99%',
           }}
         >
-          {post.message.replace(/@&lt;(\S*) \S*&gt;/g, (m, g) => `@${g}`)}
+          {this.wrapString(
+            post.message.replace(/@&lt;(\S*) \S*&gt;/g, (_m, g) => `@${g}`)
+          )}
         </Text>
         {links}
       </View>
@@ -97,6 +144,7 @@ MessageBlock.propTypes = {
     fontFamily: PropTypes.string,
     fontSize: PropTypes.number,
     foregroundColor: PropTypes.string,
+    textWidth: PropTypes.number,
   }),
   highlight: PropTypes.bool,
   post: PropTypes.shape({
