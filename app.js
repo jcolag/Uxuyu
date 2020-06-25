@@ -24,6 +24,7 @@ export default class TwtxtClient extends Component {
       foregroundColor: 'white',
       minInterval: 15,
       openApp: null,
+      scrapeRegistries: false,
       textWidth: 100,
     };
 
@@ -39,17 +40,23 @@ export default class TwtxtClient extends Component {
       };
     });
 
-    const fworker = new Worker('./followworker.js', {
+    const followWorker = new Worker('./followworker.js', {
       workerData: {
         following: twtxtconfig.following,
         minInterval: Math.max(config.minInterval, 5),
         twtxtConfig: twtxtconfig.twtxt,
       },
     });
-    const pworker = new Worker('./accountworker.js', {
+    const peerWorker = new Worker('./accountworker.js', {
       workerData: {
         minInterval: Math.max(config.minInterval, 5),
         following: twtxtconfig.following,
+      },
+    });
+    const registryWorker = new Worker('./registryworker.js', {
+      workerData: {
+        minInterval: Math.max(config, config.minInterval, 5),
+        scrapeRegistries: config.scrapeRegistries,
       },
     });
     const following = {};
@@ -81,8 +88,9 @@ export default class TwtxtClient extends Component {
       query: null,
       showAllUsers: false,
       showOnlyUser: null,
-      threadAccount: pworker,
-      threadFollow: fworker,
+      threadAccount: peerWorker,
+      threadFollow: followWorker,
+      threadRegistry: registryWorker,
       twtxt: twtxtconfig.twtxt,
     };
     this.postText = '';
@@ -92,12 +100,12 @@ export default class TwtxtClient extends Component {
     this.boundJumpToPost = this.jumpToPost.bind(this);
     this.increasePage = this.updatePage.bind(this, 1);
     this.decreasePage = this.updatePage.bind(this, -1);
-    fworker.on('message', this.takeUpdate.bind(this));
-    fworker.on('error', this.reportUpdateError.bind(this));
-    fworker.on('exit', this.reportExit.bind(this));
-    pworker.on('message', this.updateAccounts.bind(this));
-    pworker.on('error', this.reportUpdateError.bind(this));
-    pworker.on('exit', this.reportExit.bind(this));
+    followWorker.on('message', this.takeUpdate.bind(this));
+    followWorker.on('error', this.reportUpdateError.bind(this));
+    followWorker.on('exit', this.reportExit.bind(this));
+    peerWorker.on('message', this.updateAccounts.bind(this));
+    peerWorker.on('error', this.reportUpdateError.bind(this));
+    peerWorker.on('exit', this.reportExit.bind(this));
   }
 
   updateAccounts(accountUpdate) {
