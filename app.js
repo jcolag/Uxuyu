@@ -55,7 +55,7 @@ export default class TwtxtClient extends Component {
     });
     const registryWorker = new Worker('./registryworker.js', {
       workerData: {
-        minInterval: Math.max(config, config.minInterval, 5),
+        minInterval: Math.max(config.minInterval, 5),
         scrapeRegistries: config.scrapeRegistries,
       },
     });
@@ -142,7 +142,7 @@ export default class TwtxtClient extends Component {
               .replace(/^@&lt;/, '')
               .replace(/&gt;.*/, '')
               .split(' ');
-            this.addUser(parts);
+            this.addFoundUser(parts);
             if (parts[0] === this.state.twtxt.nick) {
               let mentions = this.state.mentions;
               const found = mentions.filter(
@@ -213,7 +213,7 @@ export default class TwtxtClient extends Component {
     });
   }
 
-  addUser(parts) {
+  addFoundUser(parts) {
     const user = {
       name: parts[0],
       address: parts[1],
@@ -223,9 +223,7 @@ export default class TwtxtClient extends Component {
     if (
       !Object.prototype.hasOwnProperty.call(this.state.knownPeers, user.name)
     ) {
-      knownPeers[user.name] = {
-        url: user.address,
-      };
+      knownPeers[user.name] = user;
       this.setState({
         knownPeers: knownPeers,
       });

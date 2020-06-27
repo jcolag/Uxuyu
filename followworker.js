@@ -6,7 +6,11 @@ const ms = workerData.minInterval * 60 * 1000;
 let knownPeers = workerData.following;
 // eslint-disable-next-line no-unused-vars
 const interval = setInterval(updatePosts, ms, parentPort);
-let iterations = 1;
+
+// This looks stupid, but the first iteration is #4 so that we don't try to
+// pull every feed at once, but also aren't waiting half an hour (or whatever
+// five intervals comes to) in order to grab the non-followed feeds.
+let iterations = 4;
 
 updatePosts(parentPort);
 parentPort.on('message', updateFollowing);
