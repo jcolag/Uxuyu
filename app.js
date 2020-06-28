@@ -28,6 +28,15 @@ export default class TwtxtClient extends Component {
       textWidth: 100,
     };
 
+    super(props);
+    try {
+      const configFile = path.join(homedir, '.config', 'Uxuyu.json');
+      const configJson = fs.readFileSync(configFile, 'utf-8');
+      const userConfig = JSON.parse(configJson);
+
+      Object.assign(config, userConfig);
+    } catch {}
+
     Object.keys(twtxtconfig.following).forEach((handle) => {
       const url = twtxtconfig.following[handle];
 
@@ -61,14 +70,6 @@ export default class TwtxtClient extends Component {
     });
     const following = {};
 
-    super(props);
-    try {
-      const configFile = path.join(homedir, '.config', 'Uxuyu.json');
-      const configJson = fs.readFileSync(configFile, 'utf-8');
-      const userConfig = JSON.parse(configJson);
-
-      Object.assign(config, userConfig);
-    } catch {}
     this.state = {
       config: config,
       following: twtxtconfig.following,
@@ -106,6 +107,9 @@ export default class TwtxtClient extends Component {
     peerWorker.on('message', this.updateAccounts.bind(this));
     peerWorker.on('error', this.reportUpdateError.bind(this));
     peerWorker.on('exit', this.reportExit.bind(this));
+    registryWorker.on('message', this.updateFromRegistry.bind(this));
+    registryWorker.on('error', this.reportUpdateError.bind(this));
+    registryWorker.on('exit', this.reportExit.bind(this));
   }
 
   updateAccounts(accountUpdate) {
@@ -183,6 +187,38 @@ export default class TwtxtClient extends Component {
     this.setState({
       posts: posts,
     });
+  }
+
+  updateFromRegistry(userUpdate) {
+    const lines = userUpdate.lines;
+    const parse = userUpdate.registry.parse;
+    const knownPeers = this.state.knownPeers;
+
+    for (let idx = 0; idx < lines.length; idx++) {
+      const match = lines[idx].match(parse);
+
+      if (match) {
+        const user = {
+          handle: match[1],
+          registered: match[3],
+          url: match[2],
+        };
+
+        if (
+          !Object.prototype.hasOwnProperty.call(
+            this.state.knownPeers,
+            user.name
+          )
+        ) {
+          knownPeers[user.name] = user;
+          this.setState({
+            knownPeers: knownPeers,
+          });
+        }
+      }
+    }
+
+    this.state.threadAccount.postMessage(this.state.knownPeers);
   }
 
   reportUpdateError(err) {
@@ -291,6 +327,7 @@ export default class TwtxtClient extends Component {
     this.setState({
       highlightDate: Number.MAX_VALUE,
       pageNumber: 0,
+      showAllUsers: true,
       showOnlyUser: null,
     });
 

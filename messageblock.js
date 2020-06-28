@@ -29,9 +29,10 @@ export default class MessageBlock extends Component {
     return 1;
   }
 
-  wrapString(text) {
+  wrapString(sourceText) {
     let result = '';
     let currentWidth = 0;
+    let text = sourceText === null ? '' : sourceText;
 
     text.split('').forEach((c) => {
       const w = this.charWidth(c);
@@ -62,6 +63,7 @@ export default class MessageBlock extends Component {
 
   render() {
     const post = this.props.post;
+    const urls = post.urls === null || typeof post.urls === 'undefined' ? [] : post.urls;
     const links = [];
     const bg = this.props.highlight
       ? this.props.config.foregroundColor
@@ -71,7 +73,7 @@ export default class MessageBlock extends Component {
       : this.props.config.foregroundColor;
     let key = 0;
 
-    post.urls.forEach((u) => {
+    urls.forEach((u) => {
       links.push(
         <Button
           key={`link-${key++}`}

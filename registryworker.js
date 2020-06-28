@@ -5,7 +5,7 @@ if (!workerData.scrapeRegistries) {
   process.exit();
 }
 
-const ms = workerData.minInterval * 60 * 1000 * 10;
+const ms = workerData.minInterval * 60 * 1000 * 24.3;
 // eslint-disable-next-line no-unused-vars
 const interval = setInterval(scrapeRegistry, ms, parentPort);
 const parseDelimited = /^(\S*)\s*(\S*)\s*(\S*)$/; // tab- or space-sep: handle, url, opt added
@@ -45,7 +45,17 @@ const registries = [
   },
 ];
 
-function scrapeRegistry() {
+// Because this code runs so infrequently (no more than every two hours,
+// unless you modified the lower bound), this fires off a one-shot
+// series of requests at half the minimum timer, so that it doesn't
+// overlap with any other activity.
+setTimeout(
+  scrapeRegistry,
+  (workerData.minInterval * 60 * 1000) / 2,
+  parentPort
+);
+
+function scrapeRegistry(parentPort) {
   registries.forEach((r) => {
     const options = {
       headers: {
@@ -62,18 +72,12 @@ function scrapeRegistry() {
           return;
         }
 
-        body.split('\n').forEach((entry) => {
-          const match = entry.match(r.parse);
-
-          if (!match) {
-            return;
-          }
-
-          parentPort.postMessage({
-            handle: match[1],
-            url: match[2],
-            registered: match[3],
-          });
+        const lines = body
+          .split('\n')
+          .filter((l) => l.trim !== '' && l[0] !== '#');
+        parentPort.postMessage({
+          lines: lines,
+          registry: r,
         });
       } catch (e) {
         console.log(`Error connecting with @${r.name} (${r.url})`);
