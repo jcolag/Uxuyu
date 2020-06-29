@@ -63,7 +63,8 @@ export default class MessageBlock extends Component {
 
   render() {
     const post = this.props.post;
-    const urls = post.urls === null || typeof post.urls === 'undefined' ? [] : post.urls;
+    const urls =
+      post.urls === null || typeof post.urls === 'undefined' ? [] : post.urls;
     const links = [];
     const bg = this.props.highlight
       ? this.props.config.foregroundColor

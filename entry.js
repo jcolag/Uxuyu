@@ -28,11 +28,30 @@ export default class Entry extends Component {
   postTweet() {
     const ts = moment().format();
     const feedFile = fs.readFileSync(this.props.twtxt.twtfile, 'utf-8');
+    const matches = this.postText.match(/@\w+/g);
     let post = `${ts}\t${this.postText}\n`;
 
+    // Look for any @references and, if we have a feed URL for that user,
+    // replace them with well-formed twtxt @references.
+    for (let m = 0; m < matches.length; m++) {
+      const match = matches[m];
+      const handle = match.slice(1);
+      const user = this.props.users[handle];
+
+      if (user) {
+        const atref = `@<${handle} ${user.url}>`;
+
+        post = post.replace(match, atref);
+      }
+    }
+
+    // It's next to impossible to have a rule for where to add the new line,
+    // so...just do it when it's not there.
     if (!feedFile.endsWith('\n')) {
       post = `\n${post}`;
     }
+
+    // Append the post to the local feed and clear the input.
     fs.appendFileSync(this.props.twtxt.twtfile, post);
     this.setState({
       defaultPostText: this.postText,
@@ -41,6 +60,8 @@ export default class Entry extends Component {
     this.setState({
       defaultPostText: '',
     });
+
+    // Call the post-tweet hook.
     if (
       Object.prototype.hasOwnProperty.call(
         this.props.twtxt,
@@ -145,4 +166,5 @@ Entry.propTypes = {
     post_tweet_hook: PropTypes.string,
     twtfile: PropTypes.string,
   }),
+  users: PropTypes.object,
 };

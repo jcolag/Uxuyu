@@ -435,6 +435,7 @@ export default class TwtxtClient extends Component {
               pageNumber={this.state.pageNumber}
               query={this.boundSwitchQuery}
               twtxt={this.state.twtxt}
+              users={this.state.knownPeers}
             />
           </View>
         </Window>
