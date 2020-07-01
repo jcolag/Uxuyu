@@ -14,7 +14,7 @@ export default class Entry extends Component {
       longMsg: false,
     };
     this.postText = '';
-    this.boundPostTweet = this.postTweet.bind(this);
+    this.handleTweetBound = this.handleSend.bind(this);
   }
 
   tweetUpdated(text) {
@@ -25,18 +25,43 @@ export default class Entry extends Component {
     });
   }
 
-  postTweet() {
+  handleSend() {
+    if (this.postText.slice('')[0] === '/') {
+      this.handleCommand(this);
+    } else {
+      this.handleTweet(this);
+    }
+  }
+
+  handleCommand(self) {
+    const command = self.postText.slice(1).split(/\s*/);
+
+    switch (command[0].toLowerCase()) {
+      case 'follow':
+        break;
+      case 'unfollow':
+        break;
+      case 'registry':
+        break;
+      case 'peers':
+        break;
+      default:
+        break;
+    }
+  }
+
+  handleTweet(self) {
     const ts = moment().format();
-    const feedFile = fs.readFileSync(this.props.twtxt.twtfile, 'utf-8');
-    const matches = this.postText.match(/@\w+/g);
-    let post = `${ts}\t${this.postText}\n`;
+    const feedFile = fs.readFileSync(self.props.twtxt.twtfile, 'utf-8');
+    const matches = self.postText.match(/@\w+/g);
+    let post = `${ts}\t${self.postText}\n`;
 
     // Look for any @references and, if we have a feed URL for that user,
     // replace them with well-formed twtxt @references.
     for (let m = 0; m < matches.length; m++) {
       const match = matches[m];
       const handle = match.slice(1);
-      const user = this.props.users[handle];
+      const user = self.props.users[handle];
 
       if (user) {
         const atref = `@<${handle} ${user.url}>`;
@@ -52,26 +77,26 @@ export default class Entry extends Component {
     }
 
     // Append the post to the local feed and clear the input.
-    fs.appendFileSync(this.props.twtxt.twtfile, post);
-    this.setState({
-      defaultPostText: this.postText,
+    fs.appendFileSync(self.props.twtxt.twtfile, post);
+    self.setState({
+      defaultPostText: self.postText,
     });
-    this.postText = '';
-    this.setState({
+    self.postText = '';
+    self.setState({
       defaultPostText: '',
     });
 
     // Call the post-tweet hook.
     if (
       Object.prototype.hasOwnProperty.call(
-        this.props.twtxt,
+        self.props.twtxt,
         'post_tweet_hook'
       ) &&
-      this.props.twtxt.post_tweet_hook.length > 0
+      self.props.twtxt.post_tweet_hook.length > 0
     ) {
       try {
-        opn(this.props.twtxt.post_tweet_hook, {
-          app: this.props.config.openApp,
+        opn(self.props.twtxt.post_tweet_hook, {
+          app: self.props.config.openApp,
         });
       } catch (e) {
         console.error(e);
@@ -122,7 +147,7 @@ export default class Entry extends Component {
           }}
           value={this.state.defaultPostText}
         />
-        <Button onPress={this.boundPostTweet} style={btnStyle} title='✉️' />
+        <Button onPress={this.handleTweetBound} style={btnStyle} title='✉️' />
         <Button
           onPress={() => this.props.query(this.postText)}
           style={btnStyle}
