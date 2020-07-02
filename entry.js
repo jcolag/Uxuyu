@@ -31,15 +31,26 @@ export default class Entry extends Component {
     } else {
       this.handleTweet(this);
     }
+
+    // Clear the input.
+    this.setState({
+      defaultPostText: this.postText,
+    });
+    this.postText = '';
+    this.setState({
+      defaultPostText: '',
+    });
   }
 
   handleCommand(self) {
-    const command = self.postText.slice(1).split(/\s*/);
+    const command = self.postText.slice(1).split(/\s+/);
 
     switch (command[0].toLowerCase()) {
       case 'follow':
+        this.props.followUser(command.slice(1));
         break;
       case 'unfollow':
+        this.props.unfollowUser(command.slice(1));
         break;
       case 'registry':
         break;
@@ -76,15 +87,8 @@ export default class Entry extends Component {
       post = `\n${post}`;
     }
 
-    // Append the post to the local feed and clear the input.
+    // Append the post to the local feed.
     fs.appendFileSync(self.props.twtxt.twtfile, post);
-    self.setState({
-      defaultPostText: self.postText,
-    });
-    self.postText = '';
-    self.setState({
-      defaultPostText: '',
-    });
 
     // Call the post-tweet hook.
     if (
@@ -181,6 +185,7 @@ Entry.propTypes = {
     openApp: PropTypes.string,
   }),
   decreasePage: PropTypes.func,
+  followUser: PropTypes.func,
   increasePage: PropTypes.func,
   pageNumber: PropTypes.number,
   query: PropTypes.func,
@@ -191,5 +196,6 @@ Entry.propTypes = {
     post_tweet_hook: PropTypes.string,
     twtfile: PropTypes.string,
   }),
+  unfollowUser: PropTypes.func,
   users: PropTypes.object,
 };

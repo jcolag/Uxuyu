@@ -101,6 +101,8 @@ export default class TwtxtClient extends Component {
     this.boundJumpToPost = this.jumpToPost.bind(this);
     this.increasePage = this.updatePage.bind(this, 1);
     this.decreasePage = this.updatePage.bind(this, -1);
+    this.boundFollowUser = this.followUser.bind(this);
+    this.boundUnfollowUser = this.unfollowUser.bind(this);
     followWorker.on('message', this.takeUpdate.bind(this));
     followWorker.on('error', this.reportUpdateError.bind(this));
     followWorker.on('exit', this.reportExit.bind(this));
@@ -110,6 +112,52 @@ export default class TwtxtClient extends Component {
     registryWorker.on('message', this.updateFromRegistry.bind(this));
     registryWorker.on('error', this.reportUpdateError.bind(this));
     registryWorker.on('exit', this.reportExit.bind(this));
+  }
+
+  followUser(handles) {
+    const filename = path.join(homedir, '.config', 'twtxt', 'config');
+    const twtxtconfig = ini.parse(fs.readFileSync(filename, 'utf-8'));
+    const following = this.state.following;
+
+    handles.forEach((handle) => {
+      if (Object.prototype.hasOwnProperty.call(this.state.knownPeers, handle)) {
+        const user = this.state.knownPeers[handle];
+
+        twtxtconfig.following[handle] = user.url;
+        following[handle] = user;
+      }
+    });
+
+    fs.writeFileSync(
+      filename,
+      ini.stringify(twtxtconfig).replace(/[=]/g, ' = ')
+    );
+    // this.setState({
+    //   following: following,
+    // });
+  }
+
+  unfollowUser(handles) {
+    const filename = path.join(homedir, '.config', 'twtxt', 'config');
+    const twtxtconfig = ini.parse(fs.readFileSync(filename, 'utf-8'));
+    const following = this.state.following;
+
+    handles.forEach((handle) => {
+      if (Object.prototype.hasOwnProperty.call(twtxtconfig.following, handle)) {
+        delete twtxtconfig.following[handle];
+      }
+      if (Object.prototype.hasOwnProperty.call(following, handle)) {
+        delete following[handle];
+      }
+    });
+
+    fs.writeFileSync(
+      filename,
+      ini.stringify(twtxtconfig).replace(/[=]/g, ' = ')
+    );
+    // this.setState({
+    //   following: following,
+    // });
   }
 
   updateAccounts(accountUpdate) {
@@ -431,10 +479,12 @@ export default class TwtxtClient extends Component {
             <Entry
               config={this.state.config}
               decreasePage={this.decreasePage}
+              followUser={this.boundFollowUser}
               increasePage={this.increasePage}
               pageNumber={this.state.pageNumber}
               query={this.boundSwitchQuery}
               twtxt={this.state.twtxt}
+              unfollowUser={this.boundUnfollowUser}
               users={this.state.knownPeers}
             />
           </View>
