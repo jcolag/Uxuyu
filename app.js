@@ -119,7 +119,9 @@ export default class TwtxtClient extends Component {
     const twtxtconfig = ini.parse(fs.readFileSync(filename, 'utf-8'));
     const following = this.state.following;
 
-    handles.forEach((handle) => {
+    handles.forEach((h) => {
+      const handle = h.indexOf('@') === 0 ? h.slice(1) : h;
+
       if (Object.prototype.hasOwnProperty.call(this.state.knownPeers, handle)) {
         const user = this.state.knownPeers[handle];
 
@@ -128,13 +130,18 @@ export default class TwtxtClient extends Component {
       }
     });
 
-    fs.writeFileSync(
-      filename,
-      ini.stringify(twtxtconfig).replace(/[=]/g, ' = ')
-    );
-    // this.setState({
-    //   following: following,
-    // });
+    if (handles.length > 0) {
+      fs.writeFileSync(
+        filename,
+        ini.stringify(twtxtconfig).replace(/[=]/g, ' = ')
+      );
+      this.setState({
+        following: {},
+      });
+      this.setState({
+        following: following,
+      });
+    }
   }
 
   unfollowUser(handles) {
@@ -142,7 +149,9 @@ export default class TwtxtClient extends Component {
     const twtxtconfig = ini.parse(fs.readFileSync(filename, 'utf-8'));
     const following = this.state.following;
 
-    handles.forEach((handle) => {
+    handles.forEach((h) => {
+      const handle = h.indexOf('@') === 0 ? h.slice(1) : h;
+
       if (Object.prototype.hasOwnProperty.call(twtxtconfig.following, handle)) {
         delete twtxtconfig.following[handle];
       }
@@ -151,13 +160,18 @@ export default class TwtxtClient extends Component {
       }
     });
 
-    fs.writeFileSync(
-      filename,
-      ini.stringify(twtxtconfig).replace(/[=]/g, ' = ')
-    );
-    // this.setState({
-    //   following: following,
-    // });
+    if (handles.length > 0) {
+      fs.writeFileSync(
+        filename,
+        ini.stringify(twtxtconfig).replace(/[=]/g, ' = ')
+      );
+      this.setState({
+        following: {},
+      });
+      this.setState({
+        following: following,
+      });
+    }
   }
 
   updateAccounts(accountUpdate) {
