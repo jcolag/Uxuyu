@@ -54,6 +54,7 @@ setTimeout(
   (workerData.minInterval * 60 * 1000) / 2,
   parentPort
 );
+parentPort.on('message', () => scrapeRegistry(parentPort));
 
 function scrapeRegistry(parentPort) {
   registries.forEach((r) => {

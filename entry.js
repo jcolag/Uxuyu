@@ -47,12 +47,16 @@ export default class Entry extends Component {
 
     switch (command[0].toLowerCase()) {
       case 'follow':
+        // Follow an additional user or users.
         this.props.followUser(command.slice(1));
         break;
       case 'unfollow':
+        // Stop following a user or users.
         this.props.unfollowUser(command.slice(1));
         break;
       case 'registry':
+        // Re-check registries, apart from any schedule.
+        this.props.updateRegistries();
         break;
       case 'peers':
         break;
@@ -197,5 +201,6 @@ Entry.propTypes = {
     twtfile: PropTypes.string,
   }),
   unfollowUser: PropTypes.func,
+  updateRegistries: PropTypes.func,
   users: PropTypes.object,
 };

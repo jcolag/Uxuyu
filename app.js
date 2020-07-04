@@ -103,6 +103,7 @@ export default class TwtxtClient extends Component {
     this.decreasePage = this.updatePage.bind(this, -1);
     this.boundFollowUser = this.followUser.bind(this);
     this.boundUnfollowUser = this.unfollowUser.bind(this);
+    this.boundUpdateRegistries = this.refreshRegistries.bind(this);
     followWorker.on('message', this.takeUpdate.bind(this));
     followWorker.on('error', this.reportUpdateError.bind(this));
     followWorker.on('exit', this.reportExit.bind(this));
@@ -172,6 +173,10 @@ export default class TwtxtClient extends Component {
         following: following,
       });
     }
+  }
+
+  refreshRegistries() {
+    this.state.threadRegistry.postMessage(null);
   }
 
   updateAccounts(accountUpdate) {
@@ -499,6 +504,7 @@ export default class TwtxtClient extends Component {
               query={this.boundSwitchQuery}
               twtxt={this.state.twtxt}
               unfollowUser={this.boundUnfollowUser}
+              updateRegistries={this.boundUpdateRegistries}
               users={this.state.knownPeers}
             />
           </View>
