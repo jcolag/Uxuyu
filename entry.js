@@ -58,7 +58,9 @@ export default class Entry extends Component {
         // Re-check registries, apart from any schedule.
         this.props.updateRegistries();
         break;
-      case 'peers':
+      case 'peer':
+        // Refresh all peer feeds, apart from any schedule.
+        this.props.updatePeers([]);
         break;
       default:
         break;
@@ -201,6 +203,7 @@ Entry.propTypes = {
     twtfile: PropTypes.string,
   }),
   unfollowUser: PropTypes.func,
+  updatePeers: PropTypes.func,
   updateRegistries: PropTypes.func,
   users: PropTypes.object,
 };

@@ -16,10 +16,14 @@ updatePosts(parentPort);
 parentPort.on('message', updateFollowing);
 
 function updateFollowing(newFollowing) {
-  knownPeers = newFollowing;
+  if (newFollowing === null) {
+    updatePosts(parentPort, true);
+  } else {
+    knownPeers = newFollowing;
+  }
 }
 
-function updatePosts(parentPort) {
+function updatePosts(parentPort, getAll = false) {
   const handles = Object.keys(knownPeers);
 
   try {
@@ -32,7 +36,7 @@ function updatePosts(parentPort) {
     handles.forEach((h) => {
       if (
         !Object.prototype.hasOwnProperty.call(workerData.following, h) &&
-        iterations % 5 !== 0
+        (iterations % 5 !== 0 || !getAll)
       ) {
         return;
       }
