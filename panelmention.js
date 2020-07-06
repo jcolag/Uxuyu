@@ -22,14 +22,17 @@ export default class PanelMention extends React.Component {
       textAlign: 'center',
       width: '98%',
     };
-    const mentionList = this.props.mentions.map((m) => (
-      <Button
-        key={++key}
-        onPress={() => this.props.jumpToPost(m)}
-        style={btnStyle}
-        title={`${m.handle}, ${moment(m.date).fromNow()}`}
-      />
-    ));
+
+    const mentionList = this.props.mentions
+      .sort((a, b) => new Date(b.date).valueOf() - new Date(a.date).valueOf())
+      .map((m) => (
+        <Button
+          key={++key}
+          onPress={() => this.props.jumpToPost(m)}
+          style={btnStyle}
+          title={`${m.handle}, ${moment(m.date).fromNow()}`}
+        />
+      ));
 
     return (
       <View
