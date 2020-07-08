@@ -50,19 +50,24 @@ export default class Entry extends Component {
         // Follow an additional user or users.
         this.props.followUser(command.slice(1));
         break;
-      case 'unfollow':
-        // Stop following a user or users.
-        this.props.unfollowUser(command.slice(1));
+      case 'peer':
+        // Refresh all peer feeds, apart from any schedule.
+        this.props.updatePeers([]);
         break;
       case 'registry':
         // Re-check registries, apart from any schedule.
         this.props.updateRegistries();
         break;
-      case 'peer':
-        // Refresh all peer feeds, apart from any schedule.
-        this.props.updatePeers([]);
+      case 'unfollow':
+        // Stop following a user or users.
+        this.props.unfollowUser(command.slice(1));
+        break;
+      case 'view':
+        // See posts from any specific user.
+        this.props.switchUser(command[1]);
         break;
       default:
+        console.log(`Unrecognized command: ${command[0]}!`);
         break;
     }
   }
@@ -195,6 +200,7 @@ Entry.propTypes = {
   increasePage: PropTypes.func,
   pageNumber: PropTypes.number,
   query: PropTypes.func,
+  switchUser: PropTypes.func,
   twtxt: PropTypes.shape({
     // eslint-disable-next-line camelcase
     character_warning: PropTypes.string,

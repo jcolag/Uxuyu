@@ -120,15 +120,17 @@ export default class TwtxtClient extends Component {
     const filename = path.join(homedir, '.config', 'twtxt', 'config');
     const twtxtconfig = ini.parse(fs.readFileSync(filename, 'utf-8'));
     const following = this.state.following;
+    const peers = this.state.knownPeers;
 
     handles.forEach((h) => {
       const handle = h.indexOf('@') === 0 ? h.slice(1) : h;
 
       if (Object.prototype.hasOwnProperty.call(this.state.knownPeers, handle)) {
-        const user = this.state.knownPeers[handle];
+        const user = peers[handle];
 
         twtxtconfig.following[handle] = user.url;
         following[handle] = user;
+        peers[handle].following = true;
       }
     });
 
@@ -142,7 +144,9 @@ export default class TwtxtClient extends Component {
       });
       this.setState({
         following: following,
+        knownPeers: peers,
       });
+      this.state.threadFollow.postMessage(peers);
     }
   }
 
@@ -150,10 +154,12 @@ export default class TwtxtClient extends Component {
     const filename = path.join(homedir, '.config', 'twtxt', 'config');
     const twtxtconfig = ini.parse(fs.readFileSync(filename, 'utf-8'));
     const following = this.state.following;
+    const peers = this.state.knownPeers;
 
     handles.forEach((h) => {
       const handle = h.indexOf('@') === 0 ? h.slice(1) : h;
 
+      peers[handle].following = false;
       if (Object.prototype.hasOwnProperty.call(twtxtconfig.following, handle)) {
         delete twtxtconfig.following[handle];
       }
@@ -172,7 +178,9 @@ export default class TwtxtClient extends Component {
       });
       this.setState({
         following: following,
+        knownPeers: peers,
       });
+      this.state.threadFollow.postMessage(peers);
     }
   }
 
@@ -345,7 +353,7 @@ export default class TwtxtClient extends Component {
       highlightDate: Number.MAX_VALUE,
       pageNumber: 1,
       query: null,
-      showAllUsers: false,
+      showAllUsers: user !== null,
       showOnlyUser: user,
     });
   }
@@ -362,6 +370,7 @@ export default class TwtxtClient extends Component {
 
   switchQuery(text) {
     this.setState({
+      highlightDate: Number.MAX_VALUE,
       pageNumber: 1,
       query: text.trim().toLowerCase(),
       showOnlyUser: null,
@@ -507,6 +516,7 @@ export default class TwtxtClient extends Component {
               increasePage={this.increasePage}
               pageNumber={this.state.pageNumber}
               query={this.boundSwitchQuery}
+              switchUser={this.boundSwitchUser}
               twtxt={this.state.twtxt}
               unfollowUser={this.boundUnfollowUser}
               updatePeers={this.boundUpdatePeers}
