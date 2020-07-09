@@ -9,6 +9,7 @@ const getUrls = require('get-urls');
 const homedir = require('os').homedir();
 const ini = require('ini');
 const path = require('path');
+const winston = require('winston');
 const { Worker } = require('worker_threads');
 
 const twtxtconfig = ini.parse(
@@ -49,6 +50,15 @@ export default class TwtxtClient extends Component {
       };
     });
 
+    const logger = winston.createLogger({
+      level: 'info',
+      format: winston.format.combine(
+        winston.format.timestamp(),
+        winston.format.json()
+      ),
+      defaultMeta: { service: 'uxuyu' },
+      transports: [new winston.transports.File({ filename: 'Uxuyu.log' })],
+    });
     const followWorker = new Worker('./followworker.js', {
       workerData: {
         following: twtxtconfig.following,
@@ -75,6 +85,7 @@ export default class TwtxtClient extends Component {
       following: twtxtconfig.following,
       highlightDate: null,
       knownPeers: Object.assign(following, twtxtconfig.following),
+      logger: logger,
       mentions: [],
       pageNumber: 1,
       posts: {
@@ -514,6 +525,7 @@ export default class TwtxtClient extends Component {
               decreasePage={this.decreasePage}
               followUser={this.boundFollowUser}
               increasePage={this.increasePage}
+              logger={this.state.logger}
               pageNumber={this.state.pageNumber}
               query={this.boundSwitchQuery}
               switchUser={this.boundSwitchUser}

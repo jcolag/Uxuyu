@@ -15,7 +15,8 @@
     "moment": "^2.24.0",
     "open": "^7.0.3",
     "proton-native": "^2.0.4",
-    "request": "^2.88.2"
+    "request": "^2.88.2",
+    "winston": "^3.3.3"
   },
   "devDependencies": {
     "@babel/cli": "^7.8.4",

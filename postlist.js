@@ -49,7 +49,10 @@ export default class PostList extends Component {
         <MessageBlock
           addUser={this.boundAddUser}
           config={this.props.config}
-          highlight={this.props.highlightDate === new Date(p.date).valueOf()}
+          highlight={
+            new Date(this.props.highlightDate).valueOf() ===
+            new Date(p.date).valueOf()
+          }
           key={(key += 5)}
           post={p}
         />

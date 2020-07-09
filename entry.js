@@ -67,7 +67,7 @@ export default class Entry extends Component {
         this.props.switchUser(command[1]);
         break;
       default:
-        console.log(`Unrecognized command: ${command[0]}!`);
+        this.props.logger.warn(`Unrecognized command: ${command[0]}!`);
         break;
     }
   }
@@ -76,11 +76,13 @@ export default class Entry extends Component {
     const ts = moment().format();
     const feedFile = fs.readFileSync(self.props.twtxt.twtfile, 'utf-8');
     const matches = self.postText.match(/@\w+/g);
+    const max =
+      matches === null || typeof matches === 'undefined' ? 0 : matches.length;
     let post = `${ts}\t${self.postText}\n`;
 
     // Look for any @references and, if we have a feed URL for that user,
     // replace them with well-formed twtxt @references.
-    for (let m = 0; m < matches.length; m++) {
+    for (let m = 0; m < max; m++) {
       const match = matches[m];
       const handle = match.slice(1);
       const user = self.props.users[handle];
@@ -198,6 +200,7 @@ Entry.propTypes = {
   decreasePage: PropTypes.func,
   followUser: PropTypes.func,
   increasePage: PropTypes.func,
+  logger: PropTypes.object,
   pageNumber: PropTypes.number,
   query: PropTypes.func,
   switchUser: PropTypes.func,

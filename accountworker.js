@@ -1,5 +1,6 @@
 const { parentPort, workerData } = require('worker_threads');
 const sqlite3 = require('better-sqlite3');
+const winston = require('winston');
 
 const following = workerData.following;
 const ms = (workerData.minInterval * 60 * 1000) / 3;
@@ -11,6 +12,15 @@ const db = new sqlite3(dbSource, {
   verbose: null,
 });
 const columns = 'handle, url, last_seen, last_post';
+const logger = winston.createLogger({
+  level: 'info',
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.json()
+  ),
+  defaultMeta: { service: 'uxuyu' },
+  transports: [new winston.transports.File({ filename: 'Uxuyu.log' })],
+});
 let selectAllStmt = '';
 
 try {
@@ -51,14 +61,14 @@ try {
           insStmt.run(h, userDict[h].url, Date.now().valueOf(), 0);
         }
       } catch (he) {
-        console.log(he);
+        logger.error(he);
       }
     });
   });
 
   updateAccounts(parentPort);
 } catch (e) {
-  console.log(e);
+  logger.error(e);
 }
 
 function updateAccounts(parentPort) {

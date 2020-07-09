@@ -1,4 +1,5 @@
 const request = require('request');
+const winston = require('winston');
 const { parentPort, workerData } = require('worker_threads');
 
 if (!workerData.scrapeRegistries) {
@@ -10,6 +11,15 @@ const ms = workerData.minInterval * 60 * 1000 * 24.3;
 const interval = setInterval(scrapeRegistry, ms, parentPort);
 const parseDelimited = /^(\S*)\s*(\S*)\s*(\S*)$/; // tab- or space-sep: handle, url, opt added
 const parseHandle = /^@<(\S*) (\S*)>()$/; // @<handle url>
+const logger = winston.createLogger({
+  level: 'info',
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.json()
+  ),
+  defaultMeta: { service: 'uxuyu' },
+  transports: [new winston.transports.File({ filename: 'Uxuyu.log' })],
+});
 const registries = [
   {
     name: 'Twtxt Registry',
@@ -68,8 +78,8 @@ function scrapeRegistry(parentPort) {
     request(options, (err, res, body) => {
       try {
         if (err) {
-          console.log(`Error connecting with @${r.name} (${r.url})`);
-          console.log(err);
+          logger.warn(`Error connecting with @${r.name} (${r.url})`);
+          logger.warn(err);
           return;
         }
 
@@ -81,8 +91,8 @@ function scrapeRegistry(parentPort) {
           registry: r,
         });
       } catch (e) {
-        console.log(`Error connecting with @${r.name} (${r.url})`);
-        console.log(e);
+        logger.warn(`Error connecting with @${r.name} (${r.url})`);
+        logger.warn(e);
       }
     });
   });

@@ -1,11 +1,21 @@
 const fs = require('fs');
 const request = require('request');
+const winston = require('winston');
 const { parentPort, workerData } = require('worker_threads');
 
 const ms = workerData.minInterval * 60 * 1000;
 let knownPeers = workerData.following;
 // eslint-disable-next-line no-unused-vars
 const interval = setInterval(updatePosts, ms, parentPort);
+const logger = winston.createLogger({
+  level: 'info',
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.json()
+  ),
+  defaultMeta: { service: 'uxuyu' },
+  transports: [new winston.transports.File({ filename: 'Uxuyu.log' })],
+});
 
 // This looks stupid, but the first iteration is #4 so that we don't try to
 // pull every feed at once, but also aren't waiting half an hour (or whatever
@@ -51,19 +61,19 @@ function updatePosts(parentPort, getAll = false) {
       request(options, (err, res, body) => {
         try {
           if (err) {
-            console.log(`Error connecting with @${h} (${options.url})`);
-            console.log(err);
+            logger.warn(`Error connecting with @${h} (${options.url})`);
+            logger.warn(err);
             return;
           }
 
           parentPort.postMessage(postsFromLog(body, h));
         } catch (e) {
-          console.log(e);
+          logger.error(e);
         }
       });
     });
   } catch (e) {
-    console.log(e);
+    logger.error(e);
   }
 
   iterations += 1;
