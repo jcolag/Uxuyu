@@ -72,6 +72,7 @@ function scrapeRegistry(parentPort) {
       headers: {
         'User-Agent': 'Uxuyu Prototype Testing',
       },
+      rejectUnauthorized: false,
       url: r.url,
     };
 

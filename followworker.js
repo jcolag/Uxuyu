@@ -55,6 +55,7 @@ function updatePosts(parentPort, getAll = false) {
         headers: {
           'User-Agent': 'Uxuyu Prototype Testing',
         },
+        rejectUnauthorized: false,
         url: knownPeers[h].url,
       };
 
