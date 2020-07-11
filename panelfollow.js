@@ -6,11 +6,6 @@ export default class PanelFollow extends Component {
   constructor(props) {
     super(props);
     this.state = {};
-    this.boundChangeUser = this.changeUser.bind(this);
-  }
-
-  changeUser(u) {
-    this.props.switchUser(u);
   }
 
   render() {
@@ -31,7 +26,7 @@ export default class PanelFollow extends Component {
       following.push(
         <Button
           key={++key}
-          onPress={() => this.boundChangeUser(f)}
+          onPress={() => this.props.switchUser(f)}
           style={btnStyle}
           title={f}
         />
@@ -71,14 +66,14 @@ export default class PanelFollow extends Component {
         >
           <Button
             key={++key}
-            onPress={() => this.boundChangeUser(this.props.owner)}
+            onPress={() => this.props.switchUser(this.props.owner)}
             style={btnStyle}
             title={`${this.props.owner} (you)`}
           />
           {following}
           <Button
             key={++key}
-            onPress={() => this.boundChangeUser(null)}
+            onPress={() => this.props.switchUser(null)}
             style={btnStyle}
             title=' 👉 All Users 👈 '
           />
