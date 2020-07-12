@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { App, Text, View, Window } from 'proton-native';
+import AccountHandler from './accounthandler';
 import Entry from './entry';
 import PostList from './postlist';
 import Sidebar from './sidebar';
@@ -105,6 +106,7 @@ export default class TwtxtClient extends Component {
       threadRegistry: registryWorker,
       twtxt: twtxtconfig.twtxt,
     };
+    this.accountHandler = new AccountHandler();
     this.postText = '';
     this.boundSwitchUser = this.switchUser.bind(this);
     this.boundSwitchToFirehose = this.switchToFirehose.bind(this);
