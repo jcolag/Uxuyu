@@ -106,7 +106,7 @@ export default class TwtxtClient extends Component {
       threadRegistry: registryWorker,
       twtxt: twtxtconfig.twtxt,
     };
-    this.accountHandler = new AccountHandler();
+    this.accountHandler = new AccountHandler(this);
     this.postText = '';
     this.boundSwitchUser = this.switchUser.bind(this);
     this.boundSwitchToFirehose = this.switchToFirehose.bind(this);
@@ -129,72 +129,30 @@ export default class TwtxtClient extends Component {
     registryWorker.on('exit', this.reportExit.bind(this));
   }
 
-  followUser(handles) {
-    const filename = path.join(homedir, '.config', 'twtxt', 'config');
-    const twtxtconfig = ini.parse(fs.readFileSync(filename, 'utf-8'));
-    const following = this.state.following;
-    const peers = this.state.knownPeers;
-
-    handles.forEach((h) => {
-      const handle = h.indexOf('@') === 0 ? h.slice(1) : h;
-
-      if (Object.prototype.hasOwnProperty.call(this.state.knownPeers, handle)) {
-        const user = peers[handle];
-
-        twtxtconfig.following[handle] = user.url;
-        following[handle] = user;
-        peers[handle].following = true;
-      }
-    });
-
-    if (handles.length > 0) {
-      fs.writeFileSync(
-        filename,
-        ini.stringify(twtxtconfig).replace(/[=]/g, ' = ')
-      );
-      this.setState({
-        following: {},
-      });
-      this.setState({
-        following: following,
-        knownPeers: peers,
-      });
-      this.state.threadFollow.postMessage(peers);
+  modifyUserFollow(handles, updateFunction) {
+    if (handles.length === 0) {
+      return;
     }
+
+    const { newState, peers } = updateFunction(
+      handles,
+      this.state.following,
+      this.state.knownPeers
+    );
+
+    this.setState({
+      following: {},
+    });
+    this.setState(newState);
+    this.state.threadFollow.postMessage(peers);
+  }
+
+  followUser(handles) {
+    this.modifyUserFollow(handles, this.accountHandler.followUser);
   }
 
   unfollowUser(handles) {
-    const filename = path.join(homedir, '.config', 'twtxt', 'config');
-    const twtxtconfig = ini.parse(fs.readFileSync(filename, 'utf-8'));
-    const following = this.state.following;
-    const peers = this.state.knownPeers;
-
-    handles.forEach((h) => {
-      const handle = h.indexOf('@') === 0 ? h.slice(1) : h;
-
-      peers[handle].following = false;
-      if (Object.prototype.hasOwnProperty.call(twtxtconfig.following, handle)) {
-        delete twtxtconfig.following[handle];
-      }
-      if (Object.prototype.hasOwnProperty.call(following, handle)) {
-        delete following[handle];
-      }
-    });
-
-    if (handles.length > 0) {
-      fs.writeFileSync(
-        filename,
-        ini.stringify(twtxtconfig).replace(/[=]/g, ' = ')
-      );
-      this.setState({
-        following: {},
-      });
-      this.setState({
-        following: following,
-        knownPeers: peers,
-      });
-      this.state.threadFollow.postMessage(peers);
-    }
+    this.modifyUserFollow(handles, this.accountHandler.unfollowUser);
   }
 
   refreshRegistries() {
@@ -283,34 +241,14 @@ export default class TwtxtClient extends Component {
   }
 
   updateFromRegistry(userUpdate) {
-    const lines = userUpdate.lines;
-    const parse = userUpdate.registry.parse;
-    const knownPeers = this.state.knownPeers;
+    const peers = this.accountHandler.updateFromRegistry(
+      userUpdate,
+      this.state.knownPeers
+    );
 
-    for (let idx = 0; idx < lines.length; idx++) {
-      const match = lines[idx].match(parse);
-
-      if (match) {
-        const user = {
-          handle: match[1],
-          registered: match[3],
-          url: match[2],
-        };
-
-        if (
-          !Object.prototype.hasOwnProperty.call(
-            this.state.knownPeers,
-            user.name
-          )
-        ) {
-          knownPeers[user.name] = user;
-          this.setState({
-            knownPeers: knownPeers,
-          });
-        }
-      }
-    }
-
+    this.setState({
+      knownPeers: peers,
+    });
     this.state.threadAccount.postMessage(this.state.knownPeers);
   }
 
@@ -361,32 +299,36 @@ export default class TwtxtClient extends Component {
     this.state.threadAccount.postMessage(this.state.knownPeers);
   }
 
-  switchUser(user) {
-    this.setState({
+  navigate(options) {
+    const defaults = {
       highlightDate: Number.MAX_VALUE,
       pageNumber: 1,
       query: null,
+      showAllUsers: false,
+      showOnlyUser: null,
+    };
+    let query = Object.assign(defaults, options);
+
+    this.setState(query);
+  }
+
+  switchUser(user) {
+    this.navigate({
       showAllUsers: user !== null,
       showOnlyUser: user,
     });
   }
 
   switchToFirehose() {
-    this.setState({
-      highlightDate: Number.MAX_VALUE,
-      pageNumber: 1,
-      query: null,
+    this.navigate({
       showAllUsers: true,
-      showOnlyUser: null,
     });
   }
 
   switchQuery(text) {
-    this.setState({
-      highlightDate: Number.MAX_VALUE,
-      pageNumber: 1,
+    this.navigate({
       query: text.trim().toLowerCase(),
-      showOnlyUser: null,
+      showAllUsers: this.state.showAllUsers,
     });
   }
 
@@ -416,32 +358,19 @@ export default class TwtxtClient extends Component {
   jumpToPost(post) {
     const handle = post.handle;
     const date = new Date(post.date);
-    let foundIndex = 0;
+    let found = 0;
 
-    this.setState({
-      highlightDate: Number.MAX_VALUE,
-      pageNumber: 0,
+    this.navigate({
       showAllUsers: true,
-      showOnlyUser: null,
     });
-
-    for (
-      foundIndex = 0;
-      foundIndex < this.state.posts[handle].length;
-      foundIndex++
-    ) {
-      if (
-        this.state.posts[handle][foundIndex].date.valueOf() === date.valueOf()
-      ) {
+    for (found = 0; found < this.state.posts[handle].length; found++) {
+      if (this.state.posts[handle][found].date.valueOf() === date.valueOf()) {
         break;
       }
     }
 
-    foundIndex = this.state.posts[handle].length - foundIndex - 1;
-    const page = Math.floor(
-      foundIndex / Number(this.state.twtxt.limit_timeline)
-    );
-
+    found = this.state.posts[handle].length - found - 1;
+    const page = Math.floor(found / Number(this.state.twtxt.limit_timeline));
     this.setState({
       highlightDate: date.valueOf(),
       pageNumber: page + 1,
