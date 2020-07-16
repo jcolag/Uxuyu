@@ -307,7 +307,7 @@ export default class TwtxtClient extends Component {
       showAllUsers: false,
       showOnlyUser: null,
     };
-    let query = Object.assign(defaults, options);
+    const query = Object.assign(defaults, options);
 
     this.setState(query);
   }
@@ -334,19 +334,16 @@ export default class TwtxtClient extends Component {
 
   updatePage(increment) {
     const newPage = this.state.pageNumber + increment;
+    const limit = Number(this.state.twtxt.limit_timeline);
+    const postCount =
+      this.state.showOnlyUser === null
+        ? Object.keys(this.state.posts)
+            .map((k) => this.state.posts[k].length)
+            .reduce((a, b) => a + b, 0)
+        : this.state.posts[this.state.showOnlyUser].length;
 
-    if (newPage < 1) {
+    if (newPage < 1 || newPage > Math.ceil(postCount / limit)) {
       return;
-    }
-
-    if (this.state.showOnlyUser !== null) {
-      const postCount = this.state.posts[this.state.showOnlyUser].length;
-
-      if (
-        newPage > Math.ceil(postCount / Number(this.state.twtxt.limit_timeline))
-      ) {
-        return;
-      }
     }
 
     this.setState({
