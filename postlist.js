@@ -22,7 +22,8 @@ export default class PostList extends Component {
           this.props.showExtended ||
           h === 'nobody' ||
           h === this.props.twtxt.nick ||
-          this.props.users[h].following
+          (Object.prototype.hasOwnProperty.call(this.props.users, h) &&
+            this.props.users[h].following)
       )
       .filter((h) => this.props.showUser === null || h === this.props.showUser)
       .forEach((h) => {

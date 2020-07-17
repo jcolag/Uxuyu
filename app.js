@@ -283,7 +283,7 @@ export default class TwtxtClient extends Component {
   addFoundUser(parts) {
     const user = {
       name: parts[0],
-      address: parts[1],
+      url: parts[1],
     };
     const knownPeers = this.state.knownPeers;
 
