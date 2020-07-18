@@ -231,6 +231,10 @@ export default class TwtxtClient extends Component {
       );
     }
 
+    const accountUpdate = {};
+
+    accountUpdate[userUpdate.handle] = userUpdate;
+    this.state.threadAccount.postMessage(accountUpdate);
     this.setState({
       posts: {},
     });

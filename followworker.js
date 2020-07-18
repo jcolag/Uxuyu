@@ -5,6 +5,7 @@ const { parentPort, workerData } = require('worker_threads');
 
 const ms = workerData.minInterval * 60 * 1000;
 let knownPeers = workerData.following;
+let mostRecent = Date.now().valueOf();
 // eslint-disable-next-line no-unused-vars
 const interval = setInterval(updatePosts, ms, parentPort);
 const logger = winston.createLogger({
@@ -30,6 +31,7 @@ function updateFollowing(newFollowing) {
     updatePosts(parentPort, true);
   } else {
     knownPeers = newFollowing;
+    mostRecent = Math.max(...Object.values(knownPeers).map((p) => p.lastSeen));
   }
 }
 
@@ -44,10 +46,24 @@ function updatePosts(parentPort, getAll = false) {
       )
     );
     handles.forEach((h) => {
-      if (
-        !Object.prototype.hasOwnProperty.call(workerData.following, h) &&
-        (iterations % 5 !== 0 || !getAll)
-      ) {
+      const user = knownPeers[h];
+      const lastSeen =
+        user === null || Number.isNaN(user.lastSeen) ? 0 : user.lastSeen;
+      const age = (mostRecent - lastSeen) / 86400000;
+      let cycle = Math.round(Math.log2(age + 1)) + 1;
+
+      // We care less about people we don't follow.
+      if (!Object.prototype.hasOwnProperty.call(workerData.following, h)) {
+        cycle *= 5;
+      }
+
+      // But if we're asked to resynchronize peers, just get everyone.
+      if (getAll) {
+        cycle = 1;
+      }
+
+      // Bail if the cycles don't match.
+      if (iterations % cycle !== 0) {
         return;
       }
 
@@ -56,7 +72,7 @@ function updatePosts(parentPort, getAll = false) {
           'User-Agent': 'Uxuyu Prototype Testing',
         },
         rejectUnauthorized: false,
-        url: knownPeers[h].url,
+        url: user.url,
       };
 
       request(options, (err, res, body) => {
@@ -110,6 +126,7 @@ function postsFromLog(logData, handle) {
       handle === workerData.twtxtConfig.nick ||
       Object.prototype.hasOwnProperty.call(knownPeers, handle),
     handle: handle,
+    lastSeen: Date.now().valueOf(),
     messages: posts.filter((p) => p !== null),
   };
 }

@@ -48,6 +48,9 @@ try {
   const insStmt = db.prepare(
     `INSERT INTO ${tableName} (${columns}) VALUES (?, ?, ?, ?)`
   );
+  const updStmt = db.prepare(
+    `UPDATE ${tableName} SET last_seen = ?, last_post = ? WHERE handle = ?`
+  );
   selectAllStmt = db.prepare(`SELECT ${columns} FROM ${tableName}`);
 
   parentPort.on('message', (userDict) => {
@@ -56,12 +59,22 @@ try {
     handles.forEach((h) => {
       try {
         const peer = checkStmt.get(h);
+        const user = userDict[h];
 
         if (peer === null || typeof peer === 'undefined') {
-          insStmt.run(h, userDict[h].url, Date.now().valueOf(), 0);
+          insStmt.run(h, user.url, Date.now().valueOf(), 0);
+        } else if (Object.prototype.hasOwnProperty.call(user, 'messages')) {
+          const lastPost =
+            user.messages.length === 0
+              ? 0
+              : Math.max(...user.messages.map((m) => m.date.valueOf()));
+
+          updStmt.run(user.lastSeen, lastPost, h);
         }
       } catch (he) {
-        logger.error(he);
+        logger.error('Unable to update database');
+        logger.error(JSON.stringify(userDict[h]));
+        logger.error(JSON.stringify(he));
       }
     });
   });
