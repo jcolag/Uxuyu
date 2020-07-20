@@ -10,7 +10,6 @@ const getUrls = require('get-urls');
 const homedir = require('os').homedir();
 const ini = require('ini');
 const path = require('path');
-const winston = require('winston');
 const { Worker } = require('worker_threads');
 
 const twtxtconfig = ini.parse(
@@ -51,15 +50,6 @@ export default class TwtxtClient extends Component {
       };
     });
 
-    const logger = winston.createLogger({
-      level: 'info',
-      format: winston.format.combine(
-        winston.format.timestamp(),
-        winston.format.json()
-      ),
-      defaultMeta: { service: 'uxuyu' },
-      transports: [new winston.transports.File({ filename: 'Uxuyu.log' })],
-    });
     const followWorker = new Worker('./followworker.js', {
       workerData: {
         following: twtxtconfig.following,
@@ -86,7 +76,6 @@ export default class TwtxtClient extends Component {
       following: twtxtconfig.following,
       highlightDate: null,
       knownPeers: Object.assign(following, twtxtconfig.following),
-      logger: logger,
       mentions: [],
       pageNumber: 1,
       posts: {
@@ -107,7 +96,6 @@ export default class TwtxtClient extends Component {
       twtxt: twtxtconfig.twtxt,
     };
     this.accountHandler = new AccountHandler(this);
-    this.postText = '';
     this.boundSwitchUser = this.switchUser.bind(this);
     this.boundSwitchToFirehose = this.switchToFirehose.bind(this);
     this.boundSwitchQuery = this.switchQuery.bind(this);
@@ -291,9 +279,7 @@ export default class TwtxtClient extends Component {
     };
     const knownPeers = this.state.knownPeers;
 
-    if (
-      !Object.prototype.hasOwnProperty.call(this.state.knownPeers, user.name)
-    ) {
+    if (!Object.prototype.hasOwnProperty.call(knownPeers, user.name)) {
       knownPeers[user.name] = user;
       this.setState({
         knownPeers: knownPeers,
@@ -457,7 +443,6 @@ export default class TwtxtClient extends Component {
               decreasePage={this.decreasePage}
               followUser={this.boundFollowUser}
               increasePage={this.increasePage}
-              logger={this.state.logger}
               pageNumber={this.state.pageNumber}
               query={this.boundSwitchQuery}
               switchUser={this.boundSwitchUser}

@@ -5,12 +5,24 @@ import { Button, Text, TextInput, View } from 'proton-native';
 const fs = require('fs');
 const moment = require('moment');
 const opn = require('open');
+const winston = require('winston');
 
 export default class Entry extends Component {
   constructor(props) {
+    const logger = winston.createLogger({
+      level: 'info',
+      format: winston.format.combine(
+        winston.format.timestamp(),
+        winston.format.json()
+      ),
+      defaultMeta: { service: 'uxuyu' },
+      transports: [new winston.transports.File({ filename: 'Uxuyu.log' })],
+    });
+
     super(props);
     this.state = {
       defaultPostText: '',
+      logger: logger,
       longMsg: false,
     };
     this.postText = '';
@@ -67,7 +79,7 @@ export default class Entry extends Component {
         this.props.switchUser(command[1]);
         break;
       default:
-        this.props.logger.warn(`Unrecognized command: ${command[0]}!`);
+        this.state.logger.warn(`Unrecognized command: ${command[0]}!`);
         break;
     }
   }
@@ -200,7 +212,6 @@ Entry.propTypes = {
   decreasePage: PropTypes.func,
   followUser: PropTypes.func,
   increasePage: PropTypes.func,
-  logger: PropTypes.object,
   pageNumber: PropTypes.number,
   query: PropTypes.func,
   switchUser: PropTypes.func,
