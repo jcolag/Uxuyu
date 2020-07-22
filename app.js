@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import React, { Component } from 'react';
 import { App, Text, View, Window } from 'proton-native';
 import AccountHandler from './accounthandler';
