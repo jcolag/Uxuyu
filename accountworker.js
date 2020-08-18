@@ -49,7 +49,7 @@ try {
     `INSERT INTO ${tableName} (${columns}) VALUES (?, ?, ?, ?)`
   );
   const updStmt = db.prepare(
-    `UPDATE ${tableName} SET last_seen = ?, last_post = ? WHERE handle = ?`
+    `UPDATE ${tableName} SET last_seen = ?, last_post = ? WHERE url = ?`
   );
   selectAllStmt = db.prepare(`SELECT ${columns} FROM ${tableName}`);
 
@@ -69,7 +69,7 @@ try {
               ? 0
               : Math.max(...user.messages.map((m) => m.date.valueOf()));
 
-          updStmt.run(user.lastSeen, lastPost, h);
+          updStmt.run(user.lastSeen, lastPost, user.url);
         }
       } catch (he) {
         logger.error('Unable to update database');
