@@ -21,6 +21,7 @@ export default class TwtxtClient extends Component {
   constructor(props) {
     const config = {
       backgroundColor: 'black',
+      cachePosts: false,
       fontFamily: null,
       fontSize: 18,
       foregroundColor: 'white',
