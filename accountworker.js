@@ -19,7 +19,6 @@ const dbSource = './uxuyu.db';
 const db = new sqlite3(dbSource, {
   verbose: null,
 });
-const columns = 'handle, url, last_seen, last_post';
 const logger = winston.createLogger({
   level: 'info',
   format: winston.format.combine(
@@ -29,40 +28,41 @@ const logger = winston.createLogger({
   defaultMeta: { service: 'uxuyu' },
   transports: [new winston.transports.File({ filename: 'Uxuyu.log' })],
 });
-let selectAllStmt = '';
+let selectAllPeersStmt = '';
 
 try {
   createTableIfMissing(peerTableName, peerTableColumns);
 
   // Now that we definitely have a database, we can start using it
-  const checkStmt = db.prepare(
+  const columns = Object.keys(peerTableColumns).join(', ');
+  const checkPeerStmt = db.prepare(
     `SELECT ${columns} FROM ${peerTableName} WHERE handle = ?`
   );
-  const insStmt = db.prepare(
+  const insPeerStmt = db.prepare(
     `INSERT INTO ${peerTableName} (${columns}) VALUES (?, ?, ?, ?)`
   );
-  const updStmt = db.prepare(
+  const updPeerStmt = db.prepare(
     `UPDATE ${peerTableName} SET last_seen = ?, last_post = ? WHERE url = ?`
   );
-  selectAllStmt = db.prepare(`SELECT ${columns} FROM ${peerTableName}`);
+  selectAllPeersStmt = db.prepare(`SELECT ${columns} FROM ${peerTableName}`);
 
   parentPort.on('message', (userDict) => {
     const handles = Object.keys(userDict);
 
     handles.forEach((h) => {
       try {
-        const peer = checkStmt.get(h);
+        const peer = checkPeerStmt.get(h);
         const user = userDict[h];
 
         if (peer === null || typeof peer === 'undefined') {
-          insStmt.run(h, user.url, Date.now().valueOf(), 0);
+          insPeerStmt.run(h, user.url, Date.now().valueOf(), 0);
         } else if (Object.prototype.hasOwnProperty.call(user, 'messages')) {
           const lastPost =
             user.messages.length === 0
               ? 0
               : Math.max(...user.messages.map((m) => m.date.valueOf()));
 
-          updStmt.run(user.lastSeen, lastPost, user.url);
+          updPeerStmt.run(user.lastSeen, lastPost, user.url);
         }
       } catch (he) {
         logger.error('Unable to update database');
@@ -98,7 +98,7 @@ function updateAccounts(parentPort) {
   const peers = {};
 
   try {
-    selectAllStmt.all().forEach((r) => {
+    selectAllPeersStmt.all().forEach((r) => {
       peers[r.handle] = {
         following: Object.prototype.hasOwnProperty.call(following, r.handle),
         handle: r.handle,
