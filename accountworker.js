@@ -6,7 +6,15 @@ const following = workerData.following;
 const ms = (workerData.minInterval * 60 * 1000) / 3;
 // eslint-disable-next-line no-unused-vars
 const interval = setInterval(updateAccounts, ms, parentPort);
-const tableName = 'peers';
+const peerTableName = 'peers';
+const peerTableColumns = {
+  handle: 'TEXT',
+  url: 'TEXT',
+  // eslint-disable-next-line camelcase
+  last_seen: 'INTEGER',
+  // eslint-disable-next-line camelcase
+  last_post: 'INTEGER',
+};
 const dbSource = './uxuyu.db';
 const db = new sqlite3(dbSource, {
   verbose: null,
@@ -24,34 +32,19 @@ const logger = winston.createLogger({
 let selectAllStmt = '';
 
 try {
-  const hasTableStmt = db.prepare(
-    `SELECT name FROM sqlite_master WHERE type='table' AND name='${tableName}';`
-  );
-  const hasTable = hasTableStmt.all();
-
-  if (hasTable.length === 0) {
-    const createTableStmt = db.prepare(
-      `CREATE TABLE ${tableName} (
-        handle TEXT,
-        url TEXT,
-        last_seen INTEGER,
-        last_post INTEGER
-      );`
-    );
-    createTableStmt.run();
-  }
+  createTableIfMissing(peerTableName, peerTableColumns);
 
   // Now that we definitely have a database, we can start using it
   const checkStmt = db.prepare(
-    `SELECT ${columns} FROM ${tableName} WHERE handle = ?`
+    `SELECT ${columns} FROM ${peerTableName} WHERE handle = ?`
   );
   const insStmt = db.prepare(
-    `INSERT INTO ${tableName} (${columns}) VALUES (?, ?, ?, ?)`
+    `INSERT INTO ${peerTableName} (${columns}) VALUES (?, ?, ?, ?)`
   );
   const updStmt = db.prepare(
-    `UPDATE ${tableName} SET last_seen = ?, last_post = ? WHERE url = ?`
+    `UPDATE ${peerTableName} SET last_seen = ?, last_post = ? WHERE url = ?`
   );
-  selectAllStmt = db.prepare(`SELECT ${columns} FROM ${tableName}`);
+  selectAllStmt = db.prepare(`SELECT ${columns} FROM ${peerTableName}`);
 
   parentPort.on('message', (userDict) => {
     const handles = Object.keys(userDict);
@@ -82,6 +75,23 @@ try {
   updateAccounts(parentPort);
 } catch (e) {
   logger.error(e);
+}
+
+function createTableIfMissing(tableName, tableSpec) {
+  const hasTableStmt = db.prepare(
+    `SELECT name FROM sqlite_master WHERE type='table' AND name='${tableName}';`
+  );
+  const hasTable = hasTableStmt.all();
+
+  if (hasTable.length === 0) {
+    const columns = Object.keys(tableSpec)
+      .map(k => ` ${k} ${tableSpec[k]}`)
+      .join(', ');
+    const createTableStmt = db.prepare(
+      `CREATE TABLE ${tableName} (${columns});`
+    );
+    createTableStmt.run();
+  }
 }
 
 function updateAccounts(parentPort) {
