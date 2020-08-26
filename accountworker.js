@@ -34,35 +34,30 @@ try {
   createTableIfMissing(peerTableName, peerTableColumns);
 
   // Now that we definitely have a database, we can start using it
-  const columns = Object.keys(peerTableColumns).join(', ');
-  const checkPeerStmt = db.prepare(
-    `SELECT ${columns} FROM ${peerTableName} WHERE handle = ?`
+  const peerSql = prepareSqlStatements(
+    peerTableColumns,
+    'last_seen = ?, last_post = ? WHERE url = ?'
   );
-  const insPeerStmt = db.prepare(
-    `INSERT INTO ${peerTableName} (${columns}) VALUES (?, ?, ?, ?)`
-  );
-  const updPeerStmt = db.prepare(
-    `UPDATE ${peerTableName} SET last_seen = ?, last_post = ? WHERE url = ?`
-  );
-  selectAllPeersStmt = db.prepare(`SELECT ${columns} FROM ${peerTableName}`);
+
+  selectAllPeersStmt = peerSql.selectAll;
 
   parentPort.on('message', (userDict) => {
     const handles = Object.keys(userDict);
 
     handles.forEach((h) => {
       try {
-        const peer = checkPeerStmt.get(h);
+        const peer = peerSql.check.get(h);
         const user = userDict[h];
 
         if (peer === null || typeof peer === 'undefined') {
-          insPeerStmt.run(h, user.url, Date.now().valueOf(), 0);
+          peerSql.insert.run(h, user.url, Date.now().valueOf(), 0);
         } else if (Object.prototype.hasOwnProperty.call(user, 'messages')) {
           const lastPost =
             user.messages.length === 0
               ? 0
               : Math.max(...user.messages.map((m) => m.date.valueOf()));
 
-          updPeerStmt.run(user.lastSeen, lastPost, user.url);
+          peerSql.update.run(user.lastSeen, lastPost, user.url);
         }
       } catch (he) {
         logger.error('Unable to update database');
@@ -85,13 +80,33 @@ function createTableIfMissing(tableName, tableSpec) {
 
   if (hasTable.length === 0) {
     const columns = Object.keys(tableSpec)
-      .map(k => ` ${k} ${tableSpec[k]}`)
+      .map((k) => ` ${k} ${tableSpec[k]}`)
       .join(', ');
     const createTableStmt = db.prepare(
       `CREATE TABLE ${tableName} (${columns});`
     );
     createTableStmt.run();
   }
+}
+
+function prepareSqlStatements(tableColumns, updateString) {
+  const columns = Object.keys(tableColumns).join(', ');
+  const checkPeerStmt = db.prepare(
+    `SELECT ${columns} FROM ${peerTableName} WHERE handle = ?`
+  );
+  const insPeerStmt = db.prepare(
+    `INSERT INTO ${peerTableName} (${columns}) VALUES (?, ?, ?, ?)`
+  );
+  const updPeerStmt = db.prepare(`UPDATE ${peerTableName} SET ${updateString}`);
+  const selectAllPeersStmt = db.prepare(
+    `SELECT ${columns} FROM ${peerTableName}`
+  );
+  return {
+    check: checkPeerStmt,
+    insert: insPeerStmt,
+    selectAll: selectAllPeersStmt,
+    update: updPeerStmt,
+  };
 }
 
 function updateAccounts(parentPort) {
