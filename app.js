@@ -224,7 +224,10 @@ export default class TwtxtClient extends Component {
     const accountUpdate = {};
 
     accountUpdate[userUpdate.handle] = userUpdate;
-    this.state.threadAccount.postMessage(accountUpdate);
+    this.state.threadAccount.postMessage({
+      data: accountUpdate,
+      type: 'peers',
+    });
     this.setState({
       posts: {},
     });
@@ -243,7 +246,10 @@ export default class TwtxtClient extends Component {
     this.setState({
       knownPeers: peers,
     });
-    this.state.threadAccount.postMessage(this.state.knownPeers);
+    this.state.threadAccount.postMessage({
+      date: this.state.knownPeers,
+      type: 'peers',
+    });
   }
 
   reportUpdateError(err) {
@@ -288,7 +294,10 @@ export default class TwtxtClient extends Component {
       });
     }
 
-    this.state.threadAccount.postMessage(this.state.knownPeers);
+    this.state.threadAccount.postMessage({
+      data: this.state.knownPeers,
+      type: 'peers',
+    });
   }
 
   navigate(options) {

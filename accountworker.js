@@ -41,30 +41,33 @@ try {
 
   selectAllPeersStmt = peerSql.selectAll;
 
-  parentPort.on('message', (userDict) => {
-    const handles = Object.keys(userDict);
+  parentPort.on('message', (contents) => {
+    if (contents.type === 'peers') {
+      const userDict = contents.data;
+      const handles = Object.keys(userDict);
 
-    handles.forEach((h) => {
-      try {
-        const peer = peerSql.check.get(h);
-        const user = userDict[h];
+      handles.forEach((h) => {
+        try {
+          const peer = peerSql.check.get(h);
+          const user = userDict[h];
 
-        if (peer === null || typeof peer === 'undefined') {
-          peerSql.insert.run(h, user.url, Date.now().valueOf(), 0);
-        } else if (Object.prototype.hasOwnProperty.call(user, 'messages')) {
-          const lastPost =
-            user.messages.length === 0
-              ? 0
-              : Math.max(...user.messages.map((m) => m.date.valueOf()));
+          if (peer === null || typeof peer === 'undefined') {
+            peerSql.insert.run(h, user.url, Date.now().valueOf(), 0);
+          } else if (Object.prototype.hasOwnProperty.call(user, 'messages')) {
+            const lastPost =
+              user.messages.length === 0
+                ? 0
+                : Math.max(...user.messages.map((m) => m.date.valueOf()));
 
-          peerSql.update.run(user.lastSeen, lastPost, user.url);
+            peerSql.update.run(user.lastSeen, lastPost, user.url);
+          }
+        } catch (he) {
+          logger.error('Unable to update database');
+          logger.error(JSON.stringify(userDict[h]));
+          logger.error(JSON.stringify(he));
         }
-      } catch (he) {
-        logger.error('Unable to update database');
-        logger.error(JSON.stringify(userDict[h]));
-        logger.error(JSON.stringify(he));
-      }
-    });
+      });
+    }
   });
 
   updateAccounts(parentPort);
