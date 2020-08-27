@@ -15,6 +15,13 @@ const peerTableColumns = {
   // eslint-disable-next-line camelcase
   last_post: 'INTEGER',
 };
+const postTableName = 'posts';
+const postTableColumns = {
+  url: 'TEXT',
+  timestamp: 'INTEGER',
+  text: 'TEXT',
+  version: 'INTEGER',
+};
 const dbSource = './uxuyu.db';
 const db = new sqlite3(dbSource, {
   verbose: null,
@@ -32,11 +39,16 @@ let selectAllPeersStmt = '';
 
 try {
   createTableIfMissing(peerTableName, peerTableColumns);
+  createTableIfMissing(postTableName, postTableColumns);
 
   // Now that we definitely have a database, we can start using it
   const peerSql = prepareSqlStatements(
     peerTableColumns,
     'last_seen = ?, last_post = ? WHERE url = ?'
+  );
+  const postSql = prepareSqlStatements(
+    postTableColumns,
+    'text = ? WHERE url = ? AND timestamp = ?'
   );
 
   selectAllPeersStmt = peerSql.selectAll;
@@ -71,6 +83,11 @@ try {
               logger.error(JSON.stringify(he));
             }
           });
+        }
+        break;
+      case 'posts':
+        {
+          const userPosts = contents.data;
         }
         break;
       default:
