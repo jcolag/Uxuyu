@@ -43,12 +43,16 @@ try {
 
   // Now that we definitely have a database, we can start using it
   const peerSql = prepareSqlStatements(
+    peerTableName,
     peerTableColumns,
-    'last_seen = ?, last_post = ? WHERE url = ?'
+    'last_seen = ?, last_post = ? WHERE url = ?',
+    'handle'
   );
   const postSql = prepareSqlStatements(
+    postTableName,
     postTableColumns,
-    'text = ? WHERE url = ? AND timestamp = ?'
+    'text = ? WHERE url = ? AND timestamp = ?',
+    'url'
   );
 
   selectAllPeersStmt = peerSql.selectAll;
@@ -118,23 +122,21 @@ function createTableIfMissing(tableName, tableSpec) {
   }
 }
 
-function prepareSqlStatements(tableColumns, updateString) {
+function prepareSqlStatements(tableName, tableColumns, updateString, checkBy) {
   const columns = Object.keys(tableColumns).join(', ');
-  const checkPeerStmt = db.prepare(
-    `SELECT ${columns} FROM ${peerTableName} WHERE handle = ?`
+  const checkStmt = db.prepare(
+    `SELECT ${columns} FROM ${tableName} WHERE ${checkBy} = ?`
   );
-  const insPeerStmt = db.prepare(
-    `INSERT INTO ${peerTableName} (${columns}) VALUES (?, ?, ?, ?)`
+  const insStmt = db.prepare(
+    `INSERT INTO ${tableName} (${columns}) VALUES (?, ?, ?, ?)`
   );
-  const updPeerStmt = db.prepare(`UPDATE ${peerTableName} SET ${updateString}`);
-  const selectAllPeersStmt = db.prepare(
-    `SELECT ${columns} FROM ${peerTableName}`
-  );
+  const updStmt = db.prepare(`UPDATE ${tableName} SET ${updateString}`);
+  const selectAllStmt = db.prepare(`SELECT ${columns} FROM ${tableName}`);
   return {
-    check: checkPeerStmt,
-    insert: insPeerStmt,
-    selectAll: selectAllPeersStmt,
-    update: updPeerStmt,
+    check: checkStmt,
+    insert: insStmt,
+    selectAll: selectAllStmt,
+    update: updStmt,
   };
 }
 
