@@ -170,6 +170,10 @@ export default class TwtxtClient extends Component {
   takeUpdate(userUpdate) {
     const posts = this.state.posts;
 
+    this.state.threadAccount.postMessage({
+      data: userUpdate,
+      type: 'posts',
+    });
     for (let i = 0; i < userUpdate.messages.length; i++) {
       const message = userUpdate.messages[i].message;
       const urls = getUrls(message);
