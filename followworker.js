@@ -83,7 +83,7 @@ function updatePosts(parentPort, getAll = false) {
             return;
           }
 
-          parentPort.postMessage(postsFromLog(body, h));
+          parentPort.postMessage(postsFromLog(body, h, user.url));
         } catch (e) {
           logger.error(e);
         }
@@ -96,7 +96,7 @@ function updatePosts(parentPort, getAll = false) {
   iterations += 1;
 }
 
-function postsFromLog(logData, handle) {
+function postsFromLog(logData, handle, url) {
   const posts = logData
     .split('\n')
     .filter((l) => l.trim().length > 0 && l.trim()[0] !== '#')
@@ -128,5 +128,6 @@ function postsFromLog(logData, handle) {
     handle: handle,
     lastSeen: Date.now().valueOf(),
     messages: posts.filter((p) => p !== null),
+    url: url,
   };
 }
