@@ -91,6 +91,10 @@ try {
         break;
       case 'posts':
         {
+            if (!workerData.shouldCachePosts) {
+              return;
+            }
+
           const userPosts = contents.data;
         }
         break;

@@ -63,6 +63,7 @@ export default class TwtxtClient extends Component {
       workerData: {
         minInterval: Math.max(config.minInterval, 5),
         following: twtxtconfig.following,
+        shouldCachePosts: config.cachePosts,
       },
     });
     const registryWorker = new Worker('./registryworker.js', {
