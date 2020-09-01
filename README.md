@@ -21,18 +21,20 @@ You can override several of **Uxuyu**'s features to improve your experience.  Th
 
 ```json
 {
-  backgroundColor: 'black', // This can be any color recognized in CSS
-  fontFamily: null,         // Again, like CSS
-  fontSize: 18,             // This number is in pixels; other units at your
-                            // own risk
-  foregroundColor: 'white', // Again, like CSS
-  minInterval: 15,          // By default, build all cyclical tasks on this
-                            // number of minutes
-  openApp: null,            // If your post-tweet script requires a specific
-                            // interpreter, mention that here
-  scrapeRegistries: false,  // Turn on the experimental ability to download
-                            // user information from registries
-  textWidth: 100,           // Point in a post to try to wrap to the next line
+  "backgroundColor': "black', // This can be any color recognized in CSS
+  "cachePosts": false,        // Store posts in the database for offline
+                              // access
+  "fontFamily": null,         // Again, like CSS
+  "fontSize": 18,             // This number is in pixels; other units at your
+                              // own risk
+  "foregroundColor": "white", // Again, like CSS
+  "minInterval": 15,          // By default, build all cyclical tasks on this
+                              // number of minutes
+  "openApp": null,            // If your post-tweet script requires a specific
+                              // interpreter, mention that here
+  "scrapeRegistries": false,  // Turn on the experimental ability to download
+                              // user information from registries
+  "textWidth": 100,           // Point in a post to try to wrap to the next line
 }
 ```
 
