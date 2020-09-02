@@ -97,8 +97,45 @@ try {
             }
 
             const userPosts = contents.data;
+            const posts = postSql.check.all(userPosts.url);
 
             for (let i = 0; i < userPosts.messages.length; i++) {
+              const messageIn = userPosts.messages[i];
+
+              if (posts === null || typeof posts === 'undefined') {
+                postSql.insert.run(
+                  userPosts.url,
+                  messageIn.date.valueOf(),
+                  messageIn.message,
+                  1
+                );
+              } else {
+                const messageSaved = posts.filter(
+                  (p) => p.timestamp === messageIn.date.valueOf()
+                );
+
+                if (messageSaved.length <= 0) {
+                  postSql.insert.run(
+                    userPosts.url,
+                    messageIn.date.valueOf(),
+                    messageIn.message,
+                    1
+                  );
+                } else {
+                  const newestVersion = messageSaved.sort(
+                    (a, b) => b.version - a.version
+                  )[0];
+
+                  if (newestVersion.text !== messageIn.message) {
+                    postSql.insert.run(
+                      userPosts.url,
+                      messageIn.date.valueOf(),
+                      messageIn.message,
+                      newestVersion.version + 1
+                    );
+                  }
+                }
+              }
             }
           }
           break;
