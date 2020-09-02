@@ -252,7 +252,7 @@ export default class TwtxtClient extends Component {
       knownPeers: peers,
     });
     this.state.threadAccount.postMessage({
-      date: peers,
+      data: peers,
       type: 'peers',
     });
   }
