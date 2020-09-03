@@ -193,12 +193,16 @@ export default class TwtxtClient extends Component {
               .replace(/&gt;.*/, '')
               .split(' ');
             this.addFoundUser(parts);
-            if (parts[0] === this.state.twtxt.nick) {
+            if (
+              parts[0] === this.state.twtxt.nick ||
+              parts[1] === this.state.twtxt.twturl
+            ) {
               let mentions = this.state.mentions;
               const found = mentions.filter(
                 (m) =>
                   // eslint-disable-next-line implicit-arrow-linebreak
-                  m.handle === userUpdate.handle &&
+                  (m.handle === userUpdate.handle ||
+                    m.message.indexOf(userUpdate.url) > 0) &&
                   m.date.toString() === userUpdate.messages[i].date.toString()
               );
 
