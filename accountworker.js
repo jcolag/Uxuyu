@@ -114,26 +114,26 @@ try {
                   (p) => p.timestamp === messageIn.date.valueOf()
                 );
 
-                if (messageSaved.length <= 0) {
+                if (messageSaved.length === 0) {
                   postSql.insert.run(
                     userPosts.url,
                     messageIn.date.valueOf(),
                     messageIn.message,
                     1
                   );
-                } else {
+                } else if (
+                  messageSaved.filter((m) => m.text === messageIn.message)
+                ) {
                   const newestVersion = messageSaved.sort(
                     (a, b) => b.version - a.version
                   )[0];
 
-                  if (newestVersion.text !== messageIn.message) {
-                    postSql.insert.run(
-                      userPosts.url,
-                      messageIn.date.valueOf(),
-                      messageIn.message,
-                      newestVersion.version + 1
-                    );
-                  }
+                  postSql.insert.run(
+                    userPosts.url,
+                    messageIn.date.valueOf(),
+                    messageIn.message,
+                    newestVersion.version + 1
+                  );
                 }
               }
             }
