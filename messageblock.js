@@ -149,6 +149,7 @@ MessageBlock.propTypes = {
     foregroundColor: PropTypes.string,
     textWidth: PropTypes.number,
   }),
+  feed: PropTypes.string,
   highlight: PropTypes.bool,
   post: PropTypes.shape({
     date: PropTypes.date,

@@ -30,6 +30,9 @@ export default class PostList extends Component {
         this.props.posts[h].forEach((p) => {
           posts.push({
             date: p.date,
+            feed: Object.prototype.hasOwnProperty.call(this.props.knownPeers, h)
+              ? this.props.knownPeers[h].url
+              : '',
             handle: h,
             message: p.message,
             urls: p.urls,
@@ -50,6 +53,7 @@ export default class PostList extends Component {
         <MessageBlock
           addUser={this.boundAddUser}
           config={this.props.config}
+          feed={p.feed}
           highlight={
             new Date(this.props.highlightDate).valueOf() ===
             new Date(p.date).valueOf()
@@ -64,6 +68,7 @@ export default class PostList extends Component {
 PostList.propTypes = {
   config: PropTypes.any,
   highlightDate: PropTypes.number,
+  knownPeers: PropTypes.any,
   pageNumber: PropTypes.number,
   query: PropTypes.string,
   posts: PropTypes.object,

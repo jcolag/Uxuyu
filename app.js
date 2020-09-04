@@ -448,6 +448,7 @@ export default class TwtxtClient extends Component {
                 <PostList
                   config={this.state.config}
                   highlightDate={this.state.highlightDate}
+                  knownPeers={this.state.knownPeers}
                   pageNumber={this.state.pageNumber}
                   posts={this.state.posts}
                   query={this.state.query}
