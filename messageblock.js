@@ -4,6 +4,7 @@ import { Button, Text, View } from 'proton-native';
 
 const moment = require('moment');
 const opn = require('open');
+const path = require('path');
 
 export default class MessageBlock extends Component {
   constructor(props) {
@@ -59,6 +60,18 @@ export default class MessageBlock extends Component {
       currentWidth += w;
     });
     return result;
+  }
+
+  findAvatar(feedUrl) {
+    const feedName = path.basename(feedUrl === null ? '' : feedUrl);
+
+    if (feedUrl === null || feedName === null) {
+      return feedUrl;
+    }
+
+    const avatarUrl = feedUrl.replace(feedName, 'avatar.png');
+
+    return avatarUrl;
   }
 
   render() {
