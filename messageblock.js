@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { Button, Text, View } from 'proton-native';
+import { Button, Image, Text, View } from 'proton-native';
 
 const moment = require('moment');
 const opn = require('open');
@@ -111,44 +111,60 @@ export default class MessageBlock extends Component {
     });
     return (
       <View
-        key={++key}
         style={{
-          backgroundColor: bg,
-          paddingTop: `${this.props.config.fontSize / 2}pt`,
+          alignItems: 'center',
+          flexDirection: 'row',
         }}
       >
-        <Text
+        <Image
+          style={{
+            maxHeight: '64px',
+            maxWidth: '64px',
+          }}
+          source={{
+            uri: null,
+          }}
+        />
+        <View
           key={++key}
           style={{
             backgroundColor: bg,
-            color: fg,
-            fontFamily: this.props.config.fontFamily,
-            fontSize: `${this.props.config.fontSize * 0.8}pt`,
-            fontWeight: 'normal',
-            textAlign: 'right',
-            width: '100%',
+            paddingTop: `${this.props.config.fontSize / 2}pt`,
           }}
         >
-          👉 {post.handle} ({moment(post.date).fromNow()})
-        </Text>
-        <Text
-          key={++key}
-          multiline
-          style={{
-            backgroundColor: bg,
-            color: fg,
-            fontFamily: this.props.config.fontFamily,
-            fontSize: `${this.props.config.fontSize}pt`,
-            fontWeight: 'normal',
-            textAlign: 'left',
-            width: '99%',
-          }}
-        >
-          {this.wrapString(
-            post.message.replace(/@&lt;(\S*) \S*&gt;/g, (_m, g) => `@${g}`)
-          )}
-        </Text>
-        {links}
+          <Text
+            key={++key}
+            style={{
+              backgroundColor: bg,
+              color: fg,
+              fontFamily: this.props.config.fontFamily,
+              fontSize: `${this.props.config.fontSize * 0.8}pt`,
+              fontWeight: 'normal',
+              textAlign: 'right',
+              width: '100%',
+            }}
+          >
+            👉 {post.handle} ({moment(post.date).fromNow()})
+          </Text>
+          <Text
+            key={++key}
+            multiline
+            style={{
+              backgroundColor: bg,
+              color: fg,
+              fontFamily: this.props.config.fontFamily,
+              fontSize: `${this.props.config.fontSize}pt`,
+              fontWeight: 'normal',
+              textAlign: 'left',
+              width: '99%',
+            }}
+          >
+            {this.wrapString(
+              post.message.replace(/@&lt;(\S*) \S*&gt;/g, (_m, g) => `@${g}`)
+            )}
+          </Text>
+          {links}
+        </View>
       </View>
     );
   }
