@@ -202,6 +202,9 @@ function updateAccounts(parentPort) {
         url: r.url,
       };
     });
-    parentPort.postMessage(peers);
+    parentPort.postMessage({
+      data: peers,
+      type: 'peers',
+    });
   } catch (e) {}
 }

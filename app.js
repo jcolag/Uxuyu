@@ -154,18 +154,22 @@ export default class TwtxtClient extends Component {
     this.state.threadFollow.postMessage(null);
   }
 
-  updateAccounts(accountUpdate) {
-    for (let i = 0; i < accountUpdate.length; i++) {
-      accountUpdate[i].following = Object.prototype.hasOwnProperty.call(
-        this.state.following,
-        accountUpdate[i].handle
-      );
-    }
+  updateAccounts(update) {
+    if (update.type === 'peers') {
+      const accountUpdate = update.data;
 
-    this.setState({
-      knownPeers: accountUpdate,
-    });
-    this.state.threadFollow.postMessage(accountUpdate);
+      for (let i = 0; i < accountUpdate.length; i++) {
+        accountUpdate[i].following = Object.prototype.hasOwnProperty.call(
+          this.state.following,
+          accountUpdate[i].handle
+        );
+      }
+
+      this.setState({
+        knownPeers: accountUpdate,
+      });
+      this.state.threadFollow.postMessage(accountUpdate);
+    }
   }
 
   takeUpdate(userUpdate) {
