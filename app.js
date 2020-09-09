@@ -112,7 +112,7 @@ export default class TwtxtClient extends Component {
     followWorker.on('message', this.takeUpdate.bind(this));
     followWorker.on('error', this.reportUpdateError.bind(this));
     followWorker.on('exit', this.reportExit.bind(this));
-    peerWorker.on('message', this.updateAccounts.bind(this));
+    peerWorker.on('message', this.updateFromDatabase.bind(this));
     peerWorker.on('error', this.reportUpdateError.bind(this));
     peerWorker.on('exit', this.reportExit.bind(this));
     registryWorker.on('message', this.updateFromRegistry.bind(this));
@@ -154,21 +154,27 @@ export default class TwtxtClient extends Component {
     this.state.threadFollow.postMessage(null);
   }
 
-  updateAccounts(update) {
-    if (update.type === 'peers') {
-      const accountUpdate = update.data;
+  updateFromDatabase(update) {
+    const updateData = update.data;
 
-      for (let i = 0; i < accountUpdate.length; i++) {
-        accountUpdate[i].following = Object.prototype.hasOwnProperty.call(
-          this.state.following,
-          accountUpdate[i].handle
-        );
-      }
+    switch (update.type) {
+      case 'peers':
+        for (let i = 0; i < updateData.length; i++) {
+          updateData[i].following = Object.prototype.hasOwnProperty.call(
+            this.state.following,
+            updateData[i].handle
+          );
+        }
 
-      this.setState({
-        knownPeers: accountUpdate,
-      });
-      this.state.threadFollow.postMessage(accountUpdate);
+        this.setState({
+          knownPeers: updateData,
+        });
+        this.state.threadFollow.postMessage(updateData);
+        break;
+      case 'posts':
+        break;
+      default:
+        break;
     }
   }
 
