@@ -209,3 +209,18 @@ function updateAccounts(parentPort) {
     });
   } catch (e) {}
 }
+
+function groupBy(list, keyGetter) {
+  // Grabbed from https://stackoverflow.com/a/38327540/3438854
+  const map = new Map();
+  list.forEach((item) => {
+    const key = keyGetter(item);
+    const collection = map.get(key);
+    if (collection) {
+      collection.push(item);
+    } else {
+      map.set(key, [item]);
+    }
+  });
+  return map;
+}
