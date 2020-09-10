@@ -58,6 +58,40 @@ try {
 
   selectAllPeersStmt = peerSql.selectAll;
 
+  if (workerData.shouldCachePosts) {
+    const allPosts = postSql.selectAll.all();
+    const postsByUrl = groupBy(allPosts, (p) => p.url);
+    const urls = Array.from(postsByUrl.keys());
+    const posts = [];
+
+    for (let iu = 0; iu < urls.length; iu++) {
+      const url = urls[iu];
+      const postsFromUrl = postsByUrl.get(url);
+      const postsByTimestamp = groupBy(postsFromUrl, (p) => p.timestamp);
+      const timestamps = Array.from(postsByTimestamp.keys());
+
+      posts[url] = [];
+      for (let it = 0; it < timestamps.length; it++) {
+        const ts = timestamps[it];
+        const postsAtTimestamp = postsByTimestamp.get(ts);
+        const versions = postsAtTimestamp.map((p) => p.version);
+        const maxVersion = Math.max.apply(null, versions);
+        const onlyLatestPosts = postsAtTimestamp.filter(
+          (p) => p.version === maxVersion
+        );
+
+        for (let ip = 0; ip < onlyLatestPosts.length; ip++) {
+          posts[url].push(onlyLatestPosts[ip]);
+        }
+      }
+    }
+
+    parentPort.postMessage({
+      data: posts,
+      type: 'posts',
+    });
+  }
+
   parentPort.on('message', (contents) => {
     try {
       switch (contents.type) {
