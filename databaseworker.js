@@ -1,3 +1,4 @@
+/* eslint-disable max-depth */
 const { parentPort, workerData } = require('worker_threads');
 const sqlite3 = require('better-sqlite3');
 const winston = require('winston');

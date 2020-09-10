@@ -59,7 +59,7 @@ export default class TwtxtClient extends Component {
         twtxtConfig: twtxtconfig.twtxt,
       },
     });
-    const peerWorker = new Worker('./accountworker.js', {
+    const peerWorker = new Worker('./databaseworker.js', {
       workerData: {
         minInterval: Math.max(config.minInterval, 5),
         following: twtxtconfig.following,
