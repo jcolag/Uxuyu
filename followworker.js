@@ -4,7 +4,7 @@ const winston = require('winston');
 const { parentPort, workerData } = require('worker_threads');
 
 const ms = workerData.minInterval * 60 * 1000;
-let knownPeers = workerData.following;
+let following = workerData.following;
 let mostRecent = Date.now().valueOf();
 // eslint-disable-next-line no-unused-vars
 const interval = setInterval(updatePosts, ms, parentPort);
@@ -30,13 +30,13 @@ function updateFollowing(newFollowing) {
   if (newFollowing === null) {
     updatePosts(parentPort, true);
   } else {
-    knownPeers = newFollowing;
-    mostRecent = Math.max(...Object.values(knownPeers).map((p) => p.lastSeen));
+    following = newFollowing;
+    mostRecent = Math.max(...Object.values(following).map((p) => p.lastSeen));
   }
 }
 
 function updatePosts(parentPort, getAll = false) {
-  const handles = Object.keys(knownPeers);
+  const handles = Object.keys(following);
 
   try {
     parentPort.postMessage(
@@ -46,7 +46,7 @@ function updatePosts(parentPort, getAll = false) {
       )
     );
     handles.forEach((h) => {
-      const user = knownPeers[h];
+      const user = following[h];
       const lastSeen =
         user === null || Number.isNaN(user.lastSeen) ? 0 : user.lastSeen;
       const age = (mostRecent - lastSeen) / 86400000;
@@ -124,7 +124,7 @@ function postsFromLog(logData, handle, url) {
   return {
     following:
       handle === workerData.twtxtConfig.nick ||
-      Object.prototype.hasOwnProperty.call(knownPeers, handle),
+      Object.prototype.hasOwnProperty.call(following, handle),
     handle: handle,
     lastSeen: Date.now().valueOf(),
     messages: posts.filter((p) => p !== null),
