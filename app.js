@@ -59,11 +59,12 @@ export default class TwtxtClient extends Component {
         twtxtConfig: twtxtconfig.twtxt,
       },
     });
-    const peerWorker = new Worker('./databaseworker.js', {
+    const dbWorker = new Worker('./databaseworker.js', {
       workerData: {
         minInterval: Math.max(config.minInterval, 5),
         following: twtxtconfig.following,
         shouldCachePosts: config.cachePosts,
+        twtxtConfig: twtxtconfig.twtxt,
       },
     });
     const registryWorker = new Worker('./registryworker.js', {
@@ -93,7 +94,7 @@ export default class TwtxtClient extends Component {
       query: null,
       showAllUsers: false,
       showOnlyUser: null,
-      threadAccount: peerWorker,
+      threadDb: dbWorker,
       threadFollow: followWorker,
       threadRegistry: registryWorker,
       twtxt: twtxtconfig.twtxt,
@@ -112,9 +113,9 @@ export default class TwtxtClient extends Component {
     followWorker.on('message', this.takeUpdate.bind(this));
     followWorker.on('error', this.reportUpdateError.bind(this));
     followWorker.on('exit', this.reportExit.bind(this));
-    peerWorker.on('message', this.updateFromDatabase.bind(this));
-    peerWorker.on('error', this.reportUpdateError.bind(this));
-    peerWorker.on('exit', this.reportExit.bind(this));
+    dbWorker.on('message', this.updateFromDatabase.bind(this));
+    dbWorker.on('error', this.reportUpdateError.bind(this));
+    dbWorker.on('exit', this.reportExit.bind(this));
     registryWorker.on('message', this.updateFromRegistry.bind(this));
     registryWorker.on('error', this.reportUpdateError.bind(this));
     registryWorker.on('exit', this.reportExit.bind(this));
@@ -172,78 +173,85 @@ export default class TwtxtClient extends Component {
         this.state.threadFollow.postMessage(updateData);
         break;
       case 'posts':
+        for (let i = 0; i < updateData.length; i++) {
+          this.takeUpdate(updateData[i], false);
+        }
         break;
       default:
         break;
     }
   }
 
-  takeUpdate(userUpdate) {
+  takeUpdate(userUpdate, updateDb = true) {
     const posts = this.state.posts;
 
-    this.state.threadAccount.postMessage({
-      data: userUpdate,
-      type: 'posts',
-    });
+    if (updateDb) {
+      this.state.threadDb.postMessage({
+        data: userUpdate,
+        type: 'posts',
+      });
+    }
     for (let i = 0; i < userUpdate.messages.length; i++) {
-      const message = userUpdate.messages[i].message;
-      const urls = getUrls(message);
+      if (userUpdate.messages[i] !== null) {
+        const message = userUpdate.messages[i].message;
+        const urls = getUrls(message);
 
-      // Some URLs are actually feeds.  Those shouldn't be included, but should
-      // be added to the list of known peer accounts.
-      urls.forEach((u) => {
-        if (u.indexOf('&gt;') > 0) {
-          const escaped = u.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // ]/
-          const tag = new RegExp(`@&lt;\\S* ${escaped}`);
-          const found = message.match(tag);
+        // Some URLs are actually feeds.  Those shouldn't be included, but should
+        // be added to the list of known peer accounts.
+        urls.forEach((u) => {
+          if (u.indexOf('&gt;') > 0) {
+            const escaped = u.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // ]/
+            const tag = new RegExp(`@&lt;\\S* ${escaped}`);
+            const found = message.match(tag);
 
-          if (found !== null) {
-            const parts = found[0]
-              .replace(/^@&lt;/, '')
-              .replace(/&gt;.*/, '')
-              .split(' ');
-            this.addFoundUser(parts);
-            if (
-              parts[0] === this.state.twtxt.nick ||
-              parts[1] === this.state.twtxt.twturl
-            ) {
-              let mentions = this.state.mentions;
-              const found = mentions.filter(
-                (m) =>
-                  // eslint-disable-next-line implicit-arrow-linebreak
-                  (m.handle === userUpdate.handle ||
-                    m.message.indexOf(userUpdate.url) > 0) &&
-                  m.date.toString() === userUpdate.messages[i].date.toString()
-              );
+            if (found !== null) {
+              const parts = found[0]
+                .replace(/^@&lt;/, '')
+                .replace(/&gt;.*/, '')
+                .split(' ');
+              this.addFoundUser(parts);
+              if (
+                parts[0] === this.state.twtxt.nick ||
+                parts[1] === this.state.twtxt.twturl
+              ) {
+                let mentions = this.state.mentions;
+                const found = mentions.filter(
+                  (m) =>
+                    // eslint-disable-next-line implicit-arrow-linebreak
+                    (m.handle === userUpdate.handle ||
+                      m.message.indexOf(userUpdate.url) > 0) &&
+                    m.date.toString() === userUpdate.messages[i].date.toString()
+                );
 
-              if (found.length === 0) {
-                mentions.push({
-                  date: userUpdate.messages[i].date,
-                  following: Object.prototype.hasOwnProperty.call(
-                    this.state.following,
-                    userUpdate.handle
-                  ),
-                  handle: userUpdate.handle,
-                  message: userUpdate.messages[i].message,
-                });
-                mentions = mentions.sort((a, b) => a.date - b.date);
-                this.setState({
-                  mentions: mentions,
-                });
+                if (found.length === 0) {
+                  mentions.push({
+                    date: userUpdate.messages[i].date,
+                    following: Object.prototype.hasOwnProperty.call(
+                      this.state.following,
+                      userUpdate.handle
+                    ),
+                    handle: userUpdate.handle,
+                    message: userUpdate.messages[i].message,
+                  });
+                  mentions = mentions.sort((a, b) => a.date - b.date);
+                  this.setState({
+                    mentions: mentions,
+                  });
+                }
               }
             }
           }
-        }
-      });
-      userUpdate.messages[i].urls = Array.from(urls).filter(
-        (u) => u.indexOf('&gt;') < 0
-      );
+        });
+        userUpdate.messages[i].urls = Array.from(urls).filter(
+          (u) => u.indexOf('&gt;') < 0
+        );
+      }
     }
 
     const accountUpdate = {};
 
     accountUpdate[userUpdate.handle] = userUpdate;
-    this.state.threadAccount.postMessage({
+    this.state.threadDb.postMessage({
       data: accountUpdate,
       type: 'peers',
     });
@@ -265,7 +273,7 @@ export default class TwtxtClient extends Component {
     this.setState({
       knownPeers: peers,
     });
-    this.state.threadAccount.postMessage({
+    this.state.threadDb.postMessage({
       data: peers,
       type: 'peers',
     });
@@ -313,7 +321,7 @@ export default class TwtxtClient extends Component {
       });
     }
 
-    this.state.threadAccount.postMessage({
+    this.state.threadDb.postMessage({
       data: knownPeers,
       type: 'peers',
     });
