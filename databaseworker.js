@@ -62,7 +62,7 @@ try {
     const allPosts = postSql.selectAll.all();
     const postsByUrl = groupBy(allPosts, (p) => p.url);
     const urls = Array.from(postsByUrl.keys());
-    const posts = [];
+    const posts = {};
 
     for (let iu = 0; iu < urls.length; iu++) {
       const url = urls[iu];
@@ -126,53 +126,11 @@ try {
           }
           break;
         case 'posts':
-          {
-            if (!workerData.shouldCachePosts) {
-              return;
-            }
-
-            const userPosts = contents.data;
-            const posts = postSql.check.all(userPosts.url);
-
-            for (let i = 0; i < userPosts.messages.length; i++) {
-              const messageIn = userPosts.messages[i];
-
-              if (posts === null || typeof posts === 'undefined') {
-                postSql.insert.run(
-                  userPosts.url,
-                  messageIn.date.valueOf(),
-                  messageIn.message,
-                  1
-                );
-              } else {
-                const messageSaved = posts.filter(
-                  (p) => p.timestamp === messageIn.date.valueOf()
-                );
-
-                if (messageSaved.length === 0) {
-                  postSql.insert.run(
-                    userPosts.url,
-                    messageIn.date.valueOf(),
-                    messageIn.message,
-                    1
-                  );
-                } else if (
-                  messageSaved.filter((m) => m.text === messageIn.message)
-                ) {
-                  const newestVersion = messageSaved.sort(
-                    (a, b) => b.version - a.version
-                  )[0];
-
-                  postSql.insert.run(
-                    userPosts.url,
-                    messageIn.date.valueOf(),
-                    messageIn.message,
-                    newestVersion.version + 1
-                  );
-                }
-              }
-            }
+          if (!workerData.shouldCachePosts) {
+            return;
           }
+
+          storePosts(contents, postSql);
           break;
         default:
           logger.error('Unknown database update');
@@ -187,6 +145,48 @@ try {
 } catch (e) {
   console.log(e);
   logger.error(e);
+}
+
+function storePosts(contents, postSql) {
+  const userPosts = contents.data;
+  const foundPosts = postSql.check.all(userPosts.url);
+
+  for (let i = 0; i < userPosts.messages.length; i++) {
+    const target = userPosts.messages[i];
+
+    if (foundPosts === null || typeof foundPosts === 'undefined') {
+      postSql.insert.run(
+        userPosts.url,
+        target.date.valueOf(),
+        target.message,
+        1
+      );
+    } else {
+      const postsAtTime = foundPosts.filter(
+        (p) => p.timestamp === target.date.valueOf()
+      );
+
+      if (postsAtTime.length === 0) {
+        postSql.insert.run(
+          userPosts.url,
+          target.date.valueOf(),
+          target.message,
+          1
+        );
+      } else if (postsAtTime.filter((m) => m.text === target.message)) {
+        const newestVersion = postsAtTime.sort(
+          (a, b) => b.version - a.version
+        )[0];
+
+        postSql.insert.run(
+          userPosts.url,
+          target.date.valueOf(),
+          target.message,
+          newestVersion.version + 1
+        );
+      }
+    }
+  }
 }
 
 function createTableIfMissing(tableName, tableSpec) {
