@@ -23,7 +23,7 @@ You can override several of **Uxuyu**'s features to improve your experience.  Th
 {
   "backgroundColor": "black", // This can be any color recognized in CSS
   "cachePosts": false,        // Store posts in the database for offline
-                              // access, if set to true
+                              // access, if set to true (see below)
   "fontFamily": null,         // Again, like CSS
   "fontSize": 18,             // This number is in pixels; other units at your
                               // own risk
@@ -73,6 +73,10 @@ Note that, if two feeds have the same handle, this may produce inconsistent resu
 ### Automatic Retrieval
 
 In the background, **Uxuyu** will retrieve feeds from people you follow, any feeds mentioned in those feeds, and any feeds found in the common twtxt user registries.
+
+### Caching Posts
+
+In theory, this will make it faster to start **Uxuyu**.  In practice, it's probably still buggy and is definitely slower than making HTTP requests, so I can't recommend turning the feature on, unless you're planning to help improve it.
 
 ## Contributions
 
